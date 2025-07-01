@@ -129,6 +129,77 @@ Des_Cuanti <- function(Variable, var2) {
   }
 }
 
+
+CorrelacionVertical <- function(BD1, BD2 = NULL, metodo = "spearman") {
+  # Asegurar que método sea válido
+  metodo <- match.arg(metodo, c("spearman", "pearson"))
+  
+  # Si BD2 no se proporciona, se correlacionan columnas de BD1 entre sí
+  if (is.null(BD2)) {
+    BD2 <- BD1
+  }
+  
+  # Asegurarse que sean data.frames
+  BD1 <- as.data.frame(BD1)
+  BD2 <- as.data.frame(BD2)
+  
+  n1 <- ncol(BD1)
+  n2 <- ncol(BD2)
+  
+  resultados <- data.frame()
+  
+  for (i in 1:n1) {
+    var1 <- as.numeric(BD1[[i]])
+    nombre1 <- names(BD1)[i]
+    
+    for (j in 1:n2) {
+      var2 <- as.numeric(BD2[[j]])
+      nombre2 <- names(BD2)[j]
+      
+      # Excluir NA
+      casos_completos <- complete.cases(var1, var2)
+      if (sum(casos_completos) > 2) {
+        cor_valor <- round(cor(var1[casos_completos], var2[casos_completos], method = metodo), 2)
+        p_valor <- round(cor.test(var1[casos_completos], var2[casos_completos], method = metodo)$p.value, 2)
+      } else {
+        cor_valor <- NA
+        p_valor <- NA
+      }
+      
+      fila <- data.frame(
+        Variable1 = nombre1,
+        Variable2 = nombre2,
+        Correlacion = cor_valor,
+        Pvalor = p_valor,
+        Metodo = metodo
+      )
+      
+      resultados <- rbind(resultados, fila)
+    }
+  }
+  
+  return(list(resultados, unique(resultados$Variable1)))
+}
+
+
+
+
+
+
+
+DesMin<-function(Variable){ # FUN. DESCRIPTIVO GENERAL
+  if(tipoV(Variable)$Tipo=="numeric"){
+    Med<-median(Variable,na.rm = T)
+    Min<-min(Variable,na.rm = T)
+    Max<-max(Variable,na.rm = T)
+    #p_val<-p_val
+    n<-(sum(1-is.na(Variable)))
+    NAs<-length(Variable)-n
+    Total<-round(cbind(Med,Min,Max,n),2)
+    Total
+  }
+}
+
 Resumen <- function(BD, respuesta, s) {
   BD <- as.data.frame(BD)
   n <- ncol(BD)
@@ -145,7 +216,8 @@ Resumen <- function(BD, respuesta, s) {
       Variable <- c(Variable,
                     names(BD)[i],varT)
     }
-  } else {
+  } 
+  else {
     for (i in 1:n) {
       Res <- DesG(BD[, i])
       fram <- rbind(fram, Res)
@@ -154,5 +226,15 @@ Resumen <- function(BD, respuesta, s) {
     }
   }
   return(cbind(Variable,fram, nom_V))
-  return(fram)
+  #return(list(fram,nom_V))
 }
+
+
+#Correlación entre variables de la misma base
+CorrelacionVertical(BD_final[, c("LONGITUD PIERNA DERECHA-REAL", "FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")], metodo = "spearman")
+
+
+#Caso 2: Correlación entre dos bases distintas
+CorrelacionVertical(BD1 = BD_final[, c("LONGITUD PIERNA DERECHA-REAL")],
+                    BD2 = BD_final[, c("FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")],
+                    metodo = "pearson")
