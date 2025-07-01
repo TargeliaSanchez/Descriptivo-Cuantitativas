@@ -231,10 +231,10 @@ Resumen <- function(BD, respuesta, s) {
 
 
 #Correlación entre variables de la misma base
-CorrelacionVertical(BD_final[, c("LONGITUD PIERNA DERECHA-REAL", "FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")], metodo = "spearman")
+#CorrelacionVertical(BD_final[, c("LONGITUD PIERNA DERECHA-REAL", "FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")], metodo = "spearman")
 
 
 #Caso 2: Correlación entre dos bases distintas
-CorrelacionVertical(BD1 = BD_final[, c("LONGITUD PIERNA DERECHA-REAL")],
-                    BD2 = BD_final[, c("FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")],
-                    metodo = "pearson")
+#CorrelacionVertical(BD1 = BD_final[, c("LONGITUD PIERNA DERECHA-REAL")],
+#                    BD2 = BD_final[, c("FanteroposteiorF_T1_Der", "FmedilateralesF_T1_Der")],
+#                    metodo = "pearson")
