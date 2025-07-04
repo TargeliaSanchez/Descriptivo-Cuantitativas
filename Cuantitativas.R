@@ -228,3 +228,175 @@ Resumen <- function(BD, respuesta, s) {
   return(cbind(Variable,fram, nom_V))
   #return(list(fram,nom_V))
 }
+
+
+#FunciÃ³n para hallar la frecuencia esperada deuna tabla de contingencias
+
+###################################################
+##-----------------------------------------------##
+##       DESCRIPTIVO VARIABLES CUALITATIVAS      ##
+##-----------------------------------------------##
+###################################################
+
+### Función para la normalidad y seleccion del estadistico de centralidad
+### Media o mediana
+
+Validacionn <- function(Table) {  ## función para validar el tipo de prueba
+  # Manejo de errores para la función
+  tryCatch({
+    # Obtención de frecuencias esperadas
+    T_Es <- freq_esperada(Table)
+    
+    # Manejo de valores NA en T_Es
+    T_Es <- na.omit(T_Es)
+    
+    # Verificación de la proporción de frecuencias esperadas <= 5
+    if (prod(dim(Table)) > 0) {
+      prop_T_Es <- sum(T_Es <= 5, na.rm = TRUE) / prod(dim(Table))
+    } else {
+      prop_T_Es <- 0
+    }
+    
+    # Validación del caso con más del 25% de frecuencias esperadas <= 5
+    if (prop_T_Es >= 0.25) {
+      if (prod(dim(Table)) > 6) {
+        # Más de 6 celdas: prueba de Fisher simulada
+        prueba <- tryCatch({
+          fisher.test(Table, simulate.p.value = TRUE)$p.value
+        }, error = function(e) {
+          NA  # Retorna NA en caso de error
+        })
+        p <- paste0(round(prueba,2), "**")
+      } else if (prod(dim(Table)) >= 4 & prod(dim(Table)) <= 6) {
+        # Entre 4 y 6 celdas: prueba de Fisher exacta
+        prueba <- fisher.test(Table)$p.value
+        p <- paste0(round(prueba,2), "**")
+      } else {
+        # Menos de 4 celdas: no es posible realizar la prueba
+        prueba <- NA
+        p <- paste0(round(prueba,2), "_")
+      }
+    } else {
+      # Menos del 25% de celdas con frecuencias esperadas <= 5
+      if (prod(dim(Table)) > 4) {
+        # Más de 4 celdas: Chi-square con simulación
+        prueba <- chisq.test(Table, simulate.p.value = TRUE)$p.value
+        p <- paste0(round(prueba,2), "*")
+      } else {
+        # 4 o menos celdas: Chi-square estándar
+        prueba <- chisq.test(Table)$p.value
+        p <- paste0(round(prueba,2), "*")
+      }
+    }
+    
+    return(p)
+    
+  }, error = function(e) {
+    # Retorna NA si hay algún error
+    return("Error")
+  })
+}
+
+
+
+
+CualiG <- function(Variable, var2, s) {
+  
+  if (s == 1) {
+    if (is.factor(var2)) {
+      T_1 <- table(Variable, droplevels(var2))
+    } else {
+      T_1 <- table(Variable, var2)
+    }
+    
+    p_1 <- round(prop.table(T_1, 2), 4)#proporción bivariada
+    N <- margin.table(T_1, 1)## Marginal fila tabla bivariada
+    Tabla_1 <- T_1 ## Tabla bivariada concatenda con el N
+
+    #Prop_T1 <- rbind(rep("n = ", length(unique(na.omit(var2)))), p_1)
+    #### Generación de la nueva versión de las tablas 
+    tabla_part_1 <- matrix(
+      paste0(T_1, " (", round(100 * p_1, 2), "%)"),  # Si quieres porcentajes redondeados
+      nrow = nrow(T_1),
+      dimnames = dimnames(T_1)
+    )
+    Margin_fil <- table(Variable)
+    Prop_Total <- c(round(sum(T_1)/length(Variable) * 100, 2),round(prop.table(Margin_fil) * 100, 2))
+    Totaln <- c(tot=sum(Margin_fil),N)
+
+    
+    Total<-paste0(Totaln," (",Prop_Total,"%)")
+    
+    #Ptotal <- round(Totaln / length(Variable) * 100, 2)
+    #Prop_T1 <- c(Ptotal, Prop_Total)
+    variables<-paste0("n = ",margin.table(T_1,2))#paste0(Totaln," [",Prop_T1,"%]")
+    Valor_P <- Validacionn(T_1)
+    #Prueba <- Validacionn(T_1)[2]
+    `Valor P`<-Valor_P
+    Tabla_bivariada<-cbind(rbind(variables=variables,tabla_part_1 ),Total,`Valor P`)
+
+    TotalG <- c(Totaln, Total)
+
+    Prop_TotalG <- c("n = ", Prop_Total)
+    #Cual <- cbind(Tabla_1, TotalG, Prop_T1, Prop_TotalG, Valor_P, Prueba,Variables=c(row.names(Tabla_1)))
+    #A<-list(H_fmt,Tab_total)
+    
+    #row.names(Tabla_bivariada)[1]<-names(Variable)
+    return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
+  } else if (s == 2) {
+    Total <- table(Variable)
+    Totaln <- sum(Total)
+    TotalG <- c(Variable = Totaln, Total)
+    Prop_Total <- round(prop.table(Total) * 100, 2)
+    Ptotal <- round(Totaln / length(Variable) * 100, 1)
+    Prop_T1 <- c(Ptotal, Prop_Total)
+    Cual <- cbind(TotalG, Prop_T1)
+    return(Cual)
+  } else {
+    T_1 <- table(Variable, var2)
+    Orr <- RR(T_1)
+    return(Orr)
+  }
+}
+
+
+tablas <- function(BD, respuesta, s) {
+  BD <- as.data.frame(BD)
+  f <- data.frame()
+  nom_Variable <- c()
+  n <- dim(BD)[2]
+  nombres<-names(BD)
+  
+  for (i in 1:n) {
+    variable_actual <- BD[[i]]
+    if (all(is.na(variable_actual))) next
+    
+    resultado <- tryCatch({
+      CualiG(variable_actual, respuesta, s)
+    }, error = function(e) {
+      warning(paste("Error en la variable", names(BD)[i], ":", e$message))
+      return(NULL)
+    })
+    
+    if (!is.null(resultado)) {
+      resultado[1,1]<-nombres[i]
+      f <- rbind(f,resultado)
+      if (is.factor(variable_actual)) {
+        nom_Variable <- c(nom_Variable, c("N", rep(names(BD)[i], length(levels(variable_actual)))))
+      } else {
+        nom_Variable <- c(nom_Variable, c("N", rep(names(BD)[i], length(unique(na.omit(variable_actual))))))
+      }
+    }
+  }
+  
+  
+  Resultado <- cbind(f,nom_Variable)
+  return(Resultado)
+}
+
+
+
+
+
+
+
