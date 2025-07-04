@@ -238,6 +238,14 @@ Resumen <- function(BD, respuesta, s) {
 ##-----------------------------------------------##
 ###################################################
 
+
+freq_esperada<-function(Table){
+  margin.table(Table,1)->f
+  margin.table(Table,2)->c
+  cbind(f*c[1]/margin.table(Table), f*c[2]/margin.table(Table))
+}#FunciÃ³n para hallar la frecuencia esperada deuna tabla de contingencias
+
+
 ### Función para la normalidad y seleccion del estadistico de centralidad
 ### Media o mediana
 
