@@ -106,7 +106,7 @@ Des_Cuanti <- function(Variable, var2) {
       }
     }
     Total <- DesG(Variable)
-    Bivariate <- rbind(n = stats$n, Res= paste0(stats$Med," [", stats$Q1_Sd, " - ", Q3=stats$Q3,"]"))
+    Bivariate <- rbind(n = paste0("n = ",stats$n), Res= paste0(stats$Med," [", stats$Q1_Sd, " - ", Q3=stats$Q3,"]"))
     return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2) ))
     #return(Bivariate)
   } else {
@@ -123,7 +123,7 @@ Des_Cuanti <- function(Variable, var2) {
       }
     }
     Total <- DesG(Variable)
-    Bivariate <- rbind( n = stats$n, Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
+    Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
     return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2)))
     #return(Bivariate)
   }
