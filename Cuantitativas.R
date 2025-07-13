@@ -402,6 +402,40 @@ tablas <- function(BD, respuesta, s) {
   return(Resultado)
 }
 
+##############-------------------------------------------
+CV_por_grupo <- function(BD, grupo) {
+  BD <- as.data.frame(BD)
+  grupo <- as.factor(grupo)
+  
+  resultado <- data.frame(Variable = character())
+  
+  for (var in names(BD)) {
+    variable <- BD[[var]]
+    
+    if (is.numeric(variable)) {
+      # Media y SD por grupo
+      Medias <- tapply(variable, grupo, mean, na.rm = TRUE)
+      SDs <- tapply(variable, grupo, sd, na.rm = TRUE)
+      CVs <- round((SDs / Medias) * 100, 0)
+      
+      # Total
+      media_total <- mean(variable, na.rm = TRUE)
+      sd_total <- sd(variable, na.rm = TRUE)
+      cv_total <- round((sd_total / media_total) * 100, 2)
+      
+      # Armar fila
+      fila <- as.data.frame(t(CVs))
+      fila$Total <- cv_total
+      fila$Variable <- var
+      
+      resultado <- rbind(resultado, fila)
+    }
+  }
+  
+  # Reordenar columnas: Variable + grupos + Total
+  resultado <- resultado[, c("Variable", setdiff(names(resultado), "Variable"))]
+  return(resultado)
+}
 
 
 
