@@ -1,11 +1,22 @@
 tipoV <- function(BD) {
   Exploratorio <- as.data.frame(BD)
+  
+  es_num_convertible <- sapply(Exploratorio, function(x) {
+    suppressWarnings({
+      x_num <- as.numeric(as.character(x))
+      propor_na <- mean(is.na(x_num))
+      propor_na < 0.99  # Puedes ajustar el umbral
+    })
+  })
+  
   tipo <- sapply(Exploratorio, class)
-  nomCual <- names(Exploratorio)[tipo == "character"]
-  nomCuan <- names(Exploratorio)[tipo == "numeric"]
-  Otros <- names(Exploratorio)[tipo %in% c("POSIXct", "logical")]
+  
+  nomCuan <- names(Exploratorio)[(tipo == "numeric") | es_num_convertible]
+  nomCual <- setdiff(names(Exploratorio), nomCuan)
+  
   factores <- names(Exploratorio)[tipo == "factor"]
   lista <- names(Exploratorio)[tipo == "list"]
+  
   Resultado <- list(
     Tipo = tipo,
     Cualis = nomCual,
@@ -15,6 +26,7 @@ tipoV <- function(BD) {
   )
   return(Resultado)
 }
+
 
 
 
