@@ -58,6 +58,7 @@ PP_val <- function(Variable) {
 }
 
 DesG <- function(Variable) {
+  Variable<-as.numeric(Variable)
   if (tipoV(data.frame(Variable))$Tipo == "numeric") {
     p_val <- PP_val(Variable)
     n <- sum(!is.na(Variable))
@@ -85,6 +86,7 @@ DesG <- function(Variable) {
 ##ANÃLISIS DESCRIPTIVO BIVARIADO
 
 Des_Cuanti <- function(Variable, var2) {
+  Variable<-as.numeric(Variable)
   p_val <- round(PP_val(Variable),2) # Evaluar normalidad
   
   # Función auxiliar para calcular las estadísticas descriptivas
