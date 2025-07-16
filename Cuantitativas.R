@@ -308,9 +308,10 @@ Validacionn <- function(Table) {  ## función para validar el tipo de prueba
 
 
 
+
 CualiG <- function(Variable, var2, s) {
   
-  if (s == 1) {
+  #if (s == 1) {
     if (is.factor(var2)) {
       T_1 <- table(Variable, droplevels(var2))
     } else {
@@ -320,7 +321,7 @@ CualiG <- function(Variable, var2, s) {
     p_1 <- round(prop.table(T_1, 2), 4)#proporción bivariada
     N <- margin.table(T_1, 1)## Marginal fila tabla bivariada
     Tabla_1 <- T_1 ## Tabla bivariada concatenda con el N
-
+    
     #Prop_T1 <- rbind(rep("n = ", length(unique(na.omit(var2)))), p_1)
     #### Generación de la nueva versión de las tablas 
     tabla_part_1 <- matrix(
@@ -331,7 +332,7 @@ CualiG <- function(Variable, var2, s) {
     Margin_fil <- table(Variable)
     Prop_Total <- c(round(sum(T_1)/length(Variable) * 100, 2),round(prop.table(Margin_fil) * 100, 2))
     Totaln <- c(tot=sum(Margin_fil),N)
-
+    
     
     Total<-paste0(Totaln," (",Prop_Total,"%)")
     
@@ -342,29 +343,21 @@ CualiG <- function(Variable, var2, s) {
     #Prueba <- Validacionn(T_1)[2]
     `Valor P`<-Valor_P
     Tabla_bivariada<-cbind(rbind(variables=variables,tabla_part_1 ),Total,`Valor P`)
-
+    
     TotalG <- c(Totaln, Total)
-
+    
     Prop_TotalG <- c("n = ", Prop_Total)
     #Cual <- cbind(Tabla_1, TotalG, Prop_T1, Prop_TotalG, Valor_P, Prueba,Variables=c(row.names(Tabla_1)))
     #A<-list(H_fmt,Tab_total)
     
     #row.names(Tabla_bivariada)[1]<-names(Variable)
-    return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
-  } else if (s == 2) {
-    Total <- table(Variable)
-    Totaln <- sum(Total)
-    TotalG <- c(Variable = Totaln, Total)
-    Prop_Total <- round(prop.table(Total) * 100, 2)
-    Ptotal <- round(Totaln / length(Variable) * 100, 1)
-    Prop_T1 <- c(Ptotal, Prop_Total)
-    Cual <- cbind(TotalG, Prop_T1)
-    return(Cual)
-  } else {
-    T_1 <- table(Variable, var2)
-    Orr <- RR(T_1)
-    return(Orr)
-  }
+    if(s == 1){
+      return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
+    }
+    else{
+      return(cbind(rownames(Tabla_bivariada),Total))
+    }
+
 }
 
 
