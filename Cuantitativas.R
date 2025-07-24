@@ -329,7 +329,7 @@ Validacionn <- function(Table) {  ## función para validar el tipo de prueba
 
 CualiG <- function(Variable, var2, s) {
   
-  #if (s == 1) {
+  if (s == 1) {
     if (is.factor(var2)) {
       T_1 <- table(Variable, droplevels(var2))
     } else {
@@ -369,14 +369,23 @@ CualiG <- function(Variable, var2, s) {
     #A<-list(H_fmt,Tab_total)
     
     #row.names(Tabla_bivariada)[1]<-names(Variable)
-    if(s == 1){
-      return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
-    }
-    else{
-      return(cbind(rownames(Tabla_bivariada),Total))
-    }
-
+    return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
+  } else if (s == 2) {
+    Total <- table(Variable)
+    Totaln <- sum(Total)
+    TotalG <- c(Variable = Totaln, Total)
+    Prop_Total <- round(prop.table(Total) * 100, 2)
+    Ptotal <- round(Totaln / length(Variable) * 100, 1)
+    Prop_T1 <- c(Ptotal, Prop_Total)
+    Cual <- cbind(TotalG, Prop_T1)
+    return(cbind(rownames(Cual),Cual))
+  } else {
+    T_1 <- table(Variable, var2)
+    Orr <- RR(T_1)
+    return(Orr)
+  }
 }
+
 
 
 tablas <- function(BD, respuesta, s) {
