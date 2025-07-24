@@ -388,6 +388,7 @@ CualiG <- function(Variable, var2, s) {
 
 
 
+
 tablas <- function(BD, respuesta, s) {
   BD <- as.data.frame(BD)
   f <- data.frame()
@@ -417,10 +418,15 @@ tablas <- function(BD, respuesta, s) {
     }
   }
   
+  if(s==1){
+    Resultado <- cbind(f,nom_Variable)
+  }else{
+    Resultado <- cbind(f,nom_Variable)
+  }
   
-  Resultado <- cbind(f,nom_Variable)
   return(Resultado)
 }
+
 
 ##############-------------------------------------------
 CV_por_grupo <- function(BD, grupo) {
