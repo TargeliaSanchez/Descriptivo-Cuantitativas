@@ -4,29 +4,38 @@
 
 tipoV <- function(BD) {
   Exploratorio <- as.data.frame(BD)
-  
+
+  tipo <- sapply(Exploratorio, class)
+
+  # Identificar fechas (Date y POSIXct)
+  es_fecha <- tipo %in% c("Date", "POSIXct", "POSIXt")
+
+  # Identificar numéricas o convertibles a numérico
   es_num_convertible <- sapply(Exploratorio, function(x) {
+    if (inherits(x, c("Date", "POSIXct", "POSIXt"))) return(FALSE)
     suppressWarnings({
       x_num <- as.numeric(as.character(x))
       propor_na <- mean(is.na(x_num))
-      propor_na < 0.99  # Puedes ajustar el umbral
+      propor_na < 0.99  # puedes ajustar este umbral
     })
   })
-  
-  tipo <- sapply(Exploratorio, class)
-  
-  nomCuan <- names(Exploratorio)[(tipo == "numeric") | es_num_convertible]
-  nomCual <- setdiff(names(Exploratorio), nomCuan)
-  
+
+  es_numerica <- tipo == "numeric"
+
+  nomFecha <- names(Exploratorio)[es_fecha]
+  nomCuan <- names(Exploratorio)[es_numerica | es_num_convertible]
+  nomCual <- setdiff(names(Exploratorio), c(nomCuan, nomFecha))
+
   factores <- names(Exploratorio)[tipo == "factor"]
   lista <- names(Exploratorio)[tipo == "list"]
-  
+
   Resultado <- list(
     Tipo = tipo,
-    Cualis = nomCual,
     Cuantis = nomCuan,
-    factores = factores,
-    lista = lista
+    Cualis = nomCual,
+    Fechas = nomFecha,
+    Factores = factores,
+    Listas = lista
   )
   return(Resultado)
 }
