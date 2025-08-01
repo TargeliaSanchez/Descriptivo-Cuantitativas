@@ -4,26 +4,32 @@
 
 tipoV <- function(BD) {
   Exploratorio <- as.data.frame(BD)
-
   tipo <- sapply(Exploratorio, class)
 
-  # Identificar fechas (Date y POSIXct)
-  es_fecha <- tipo %in% c("Date", "POSIXct", "POSIXt")
+  # Validación de posibles fechas (tipo texto pero convertibles)
+  es_fecha_convertible <- sapply(Exploratorio, function(x) {
+    if (inherits(x, c("Date", "POSIXct", "POSIXt"))) return(TRUE)
+    if (!is.character(x)) return(FALSE)
+    suppressWarnings({
+      posibles_fechas <- as.Date(x, format = "%Y-%m-%d")
+      propor_na <- mean(is.na(posibles_fechas))
+      propor_na < 0.99
+    })
+  })
 
-  # Identificar numéricas o convertibles a numérico
+  # Validación de numéricos o convertibles
   es_num_convertible <- sapply(Exploratorio, function(x) {
     if (inherits(x, c("Date", "POSIXct", "POSIXt"))) return(FALSE)
     suppressWarnings({
       x_num <- as.numeric(as.character(x))
       propor_na <- mean(is.na(x_num))
-      propor_na < 0.99  # puedes ajustar este umbral
+      propor_na < 0.99
     })
   })
 
-  es_numerica <- tipo == "numeric"
-
-  nomFecha <- names(Exploratorio)[es_fecha]
-  nomCuan <- names(Exploratorio)[es_numerica | es_num_convertible]
+  # Nombres de variables por tipo
+  nomFecha <- names(Exploratorio)[es_fecha_convertible]
+  nomCuan <- setdiff(names(Exploratorio)[es_num_convertible | (tipo == "numeric")], nomFecha)
   nomCual <- setdiff(names(Exploratorio), c(nomCuan, nomFecha))
 
   factores <- names(Exploratorio)[tipo == "factor"]
@@ -39,7 +45,6 @@ tipoV <- function(BD) {
   )
   return(Resultado)
 }
-
 
 
 
