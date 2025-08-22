@@ -357,7 +357,7 @@ CualiG <- function(Variable, var2, s) {
     #Prop_T1 <- rbind(rep("n = ", length(unique(na.omit(var2)))), p_1)
     #### Generación de la nueva versión de las tablas 
     tabla_part_1 <- matrix(
-      paste0(T_1, " (", round(100 * p_1, 2), "%)"),  # Si quieres porcentajes redondeados
+      paste0(T_1, " (", round(100 * p_1, 2), ")"),  # Si quieres porcentajes redondeados
       nrow = nrow(T_1),
       dimnames = dimnames(T_1)
     )
@@ -366,11 +366,11 @@ CualiG <- function(Variable, var2, s) {
     Totaln <- c(tot=sum(Margin_fil),N)
     
     
-    Total<-paste0(Totaln," (",Prop_Total,"%)")
+    Total<-paste0(Totaln," (",Prop_Total,")")
     
     #Ptotal <- round(Totaln / length(Variable) * 100, 2)
     #Prop_T1 <- c(Ptotal, Prop_Total)
-    variables<-paste0("n = ",margin.table(T_1,2))#paste0(Totaln," [",Prop_T1,"%]")
+    variables<-paste0("n = ",margin.table(T_1,2))#paste0(Totaln," [",Prop_T1,"]")
     Valor_P <- Validacionn(T_1)
     #Prueba <- Validacionn(T_1)[2]
     `Valor P`<-Valor_P
