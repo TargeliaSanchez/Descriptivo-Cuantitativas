@@ -366,7 +366,7 @@ CualiG <- function(Variable, var2, s) {
     Margin_coll <- table(var2)
     Prop_Total <- c(round(sum(T_1)/length(Variable) * 100, 2),round(prop.table(Margin_fil) * 100, 2))
     #Totaln <- c(tot=sum(Margin_coll),N)
-    Totaln <- c("Toby",N)
+    Totaln <- c(sum(Margin_coll),N)
     
     
     Total<-paste0(Totaln," (",Prop_Total,")")
