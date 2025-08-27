@@ -362,11 +362,12 @@ CualiG <- function(Variable, var2, s) {
       dimnames = dimnames(T_1)
     )
     Margin_fil <- table(Variable)
+    Margin_coll <- table(Var2)
     Prop_Total <- c(round(sum(T_1)/length(Variable) * 100, 2),round(prop.table(Margin_fil) * 100, 2))
     Totaln <- c(tot=sum(Margin_fil),N)
     
-    
-    Total<-paste0(Totaln," (",Prop_Total,")")
+    Total<-paste0("n = ",sum(Margin_coll))
+    #Total<-paste0(Totaln," (",Prop_Total,")")
     
     #Ptotal <- round(Totaln / length(Variable) * 100, 2)
     #Prop_T1 <- c(Ptotal, Prop_Total)
