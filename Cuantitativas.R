@@ -352,7 +352,7 @@ CualiG <- function(Variable, var2, s) {
     
     p_1 <- round(prop.table(T_1, 2), 4)#proporción bivariada
     N <- margin.table(T_1, 1)## Marginal fila tabla bivariada
-    N2 <- margin.table(T_1, 2)## Marginal columna tabla bivariada
+    N2 <- table(var2)## Marginal columna tabla bivariada
     Tabla_1 <- T_1 ## Tabla bivariada concatenda con el N
     
     #Prop_T1 <- rbind(rep("n = ", length(unique(na.omit(var2)))), p_1)
