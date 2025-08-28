@@ -30,10 +30,12 @@ tipoV <- function(BD) {
   # Nombres de variables por tipo
   nomFecha <- names(Exploratorio)[es_fecha_convertible]
   nomCuan <- setdiff(names(Exploratorio)[es_num_convertible | (tipo == "numeric")], nomFecha)
-  nomCual <- setdiff(names(Exploratorio), c(nomCuan, nomFecha))
+  #nomCual <- setdiff(names(Exploratorio), c(nomCuan, nomFecha))
+  
 
   factores <- names(Exploratorio)[tipo == "factor"]
   lista <- names(Exploratorio)[tipo == "list"]
+  nomCual <- setdiff(c(names(Exploratorio)[tipo == "character"], factores), nomFecha)
 
   Resultado <- list(
     Tipo = tipo,
