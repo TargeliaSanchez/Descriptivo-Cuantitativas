@@ -247,7 +247,7 @@ DesMin<-function(Variable){ # FUN. DESCRIPTIVO GENERAL
 Resumen <- function(BD, respuesta, s) {
   BD <- as.data.frame(BD)
   n <- ncol(BD)
-  nom_V <- c()
+  nom_Variable <- c()
   fram <- data.frame()
   varT <- "Media (Sd)/Mediana(RIC)"
   Variable <- c()
@@ -257,7 +257,7 @@ Resumen <- function(BD, respuesta, s) {
     for (i in 1:n) {
       Res <- Des_Cuanti(BD[, i], respuesta)
       fram <- rbind(fram, Res)
-      nom_V <- c(nom_V, rep(names(BD)[i], 2))
+      nom_Variable <- c(nom_Variable, rep(names(BD)[i], 2))
       Variable <- c(Variable,
                     names(BD)[i],varT)
     }
@@ -277,11 +277,11 @@ Resumen <- function(BD, respuesta, s) {
       
       fram <- rbind(fram, Res_Medida) # <-- Ahora hace rbind con un data.frame de 1 fila
       
-      nom_V <- c(nom_V, names(BD)[i]) # Solo un nombre de variable por resumen univariado
+      nom_Variable <- c(nom_Variable, names(BD)[i]) # Solo un nombre de variable por resumen univariado
       Variable <- c(Variable, varT)
     }
   }
-  return(cbind(Variable, fram, nom_V))
+  return(cbind(Variable, fram, nom_Variable))
 }
 
 
@@ -522,8 +522,8 @@ DescriptivoUnificado <- function(BD, respuesta = NULL, s = 1) {
     # Llama a tu función Resumen.
     # Nota: Resumen ya maneja el caso univariado (s=2) o bivariado (s=1).
     resultado_cuantis <- Resumen(BD = BD_cuantis, respuesta = respuesta, s = s)
-    # Renombrar 'nom_V' a 'Variable' y 'Variable' a 'Estadístico' para claridad
-    colnames(resultado_cuantis)[colnames(resultado_cuantis) == "nom_V"] <- "Variable"
+    # Renombrar 'nom_Variable' a 'Variable' y 'Variable' a 'Estadístico' para claridad
+    colnames(resultado_cuantis)[colnames(resultado_cuantis) == "nom_Variable"] <- "Variable"
     colnames(resultado_cuantis)[colnames(resultado_cuantis) == "Variable"] <- "Estadístico"
   }
   
