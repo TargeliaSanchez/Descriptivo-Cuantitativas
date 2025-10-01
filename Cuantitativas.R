@@ -408,7 +408,8 @@ CualiG <- function(Variable, var2, s) {
     #Cual <- cbind(Tabla_1, TotalG, Prop_T1, Prop_TotalG, Valor_P, Prueba,Variables=c(row.names(Tabla_1)))
     #A<-list(H_fmt,Tab_total)
     
-    #row.names(Tabla_bivariada)[1]<-names(Variable)
+    #row.names(Tabla_bivariada)[1]<-c("Variable",names(Variable)) ############toby aqui es el ajuste
+    
     return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
   } else if (s == 2) {
     Total <- table(Variable)
