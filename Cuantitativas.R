@@ -281,7 +281,7 @@ Resumen <- function(BD, respuesta, s) {
       Variable <- c(Variable, varT)
     }
   }
-  return(cbind(Variable, fram, nom_Variable))
+  return(cbind(Variable = Variable, fram, nom_Variable))
 }
 
 
