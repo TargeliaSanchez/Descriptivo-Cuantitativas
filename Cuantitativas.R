@@ -141,7 +141,12 @@ Des_Cuanti <- function(Variable, var2) {
     }
     Total <- DesG(Variable)
     Bivariate <- rbind(n = paste0("n = ",stats$n), Res= paste0(stats$Med," [", stats$Q1_Sd, " - ", Q3=stats$Q3,"]"))
-    return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2) ))
+    categorias <- names(stats$n)
+    # Combina las matrices
+    resultado_final <- cbind(Bivariate, Total = Total$Medida, P_val = round(rbind(P_val, P_val), 2))
+    colnames(resultado_final) <- c(categorias, "Total", "P_val") # NUEVO
+    return(resultado_final)
+    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2) ))
     #return(Bivariate)
   } else {
     # Normal: usar medias y pruebas paramétricas
@@ -158,7 +163,12 @@ Des_Cuanti <- function(Variable, var2) {
     }
     Total <- DesG(Variable)
     Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
-    return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2)))
+    categorias <- names(stats$n) # NUEVO
+    # Combina las matrices
+    resultado_final <- cbind(Bivariate, Total = Total$Medida, P_val = round(rbind(P_val, P_val), 2))
+    colnames(resultado_final) <- c(categorias, "Total", "P_val") # NUEVO
+    return(resultado_final)
+    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2)))
     #return(Bivariate)
   }
 }
