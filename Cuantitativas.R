@@ -130,10 +130,10 @@ Des_Cuanti <- function(Variable, var2) {
     # No normal: usar medianas y pruebas no paramétricas
     stats <- calc_stats(Variable, var2,p_val)
     if (sum(stats$n <= 1) >= 1) {
-      P_val <- NA # Si alguna categoría tiene <= 1 datos, no se puede hacer prueba
+      `Valor P` <- NA # Si alguna categoría tiene <= 1 datos, no se puede hacer prueba
     } else if (sum(stats$n == 0) == 0) {
       categorias <- unique(na.omit(var2))
-      P_val <- if (length(categorias) == 2) {
+      `Valor P` <- if (length(categorias) == 2) {
         wilcox.test(Variable ~ var2, exact = FALSE)$p.value
       } else {
         kruskal.test(Variable ~ var2)$p.value
@@ -143,19 +143,19 @@ Des_Cuanti <- function(Variable, var2) {
     Bivariate <- rbind(n = paste0("n = ",stats$n), Res= paste0(stats$Med," [", stats$Q1_Sd, " - ", Q3=stats$Q3,"]"))
     categorias <- names(stats$n)
     # Combina las matrices
-    resultado_final <- cbind(Bivariate, Total = Total$Medida, P_val = round(rbind(P_val, P_val), 2))
-    colnames(resultado_final) <- c(categorias, "Total", "P_val") # NUEVO
+    resultado_final <- cbind(Bivariate, Total = Total$Medida, `Valor P` = round(rbind(`Valor P`, `Valor P`), 2))
+    colnames(resultado_final) <- c(categorias, "Total", "Valor P") # NUEVO
     return(resultado_final)
-    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2) ))
+    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(`Valor P`,`Valor P`),2) ))
     #return(Bivariate)
   } else {
     # Normal: usar medias y pruebas paramétricas
     stats <- calc_stats(Variable, var2,p_val)
     if (sum(stats$n <= 1) >= 1) {
-      P_val <- NA
+      `Valor P` <- NA
     } else if (sum(stats$n == 0) == 0) {
       categorias <- unique(na.omit(var2))
-      P_val <- if (length(categorias) == 2) {
+      `Valor P` <- if (length(categorias) == 2) {
         t.test(Variable ~ var2)$p.value
       } else {
         anova(aov(Variable ~ var2))$`Pr(>F)`[1]
@@ -165,10 +165,10 @@ Des_Cuanti <- function(Variable, var2) {
     Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
     categorias <- names(stats$n) # NUEVO
     # Combina las matrices
-    resultado_final <- cbind(Bivariate, Total = Total$Medida, P_val = round(rbind(P_val, P_val), 2))
-    colnames(resultado_final) <- c(categorias, "Total", "P_val") # NUEVO
+    resultado_final <- cbind(Bivariate, Total = Total$Medida, `Valor P` = round(rbind(`Valor P`, `Valor P`), 2))
+    colnames(resultado_final) <- c(categorias, "Total", "Valor P") # NUEVO
     return(resultado_final)
-    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(P_val,P_val),2)))
+    #return(cbind(Bivariate, Total=Total$Medida,Total2=round(rbind(`Valor P`,`Valor P`),2)))
     #return(Bivariate)
   }
 }
