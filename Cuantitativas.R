@@ -410,7 +410,7 @@ CualiG <- function(Variable, var2, s) {
     
     #row.names(Tabla_bivariada)[1]<-c("Variable",names(Variable)) ############toby aqui es el ajuste
     
-    return(cbind(rownames(Tabla_bivariada),Tabla_bivariada))
+    return(cbind(Variable = rownames(Tabla_bivariada),Tabla_bivariada))
   } else if (s == 2) {
     Total <- table(Variable)
     Totaln <- sum(Total)
