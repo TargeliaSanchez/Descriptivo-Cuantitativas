@@ -240,9 +240,10 @@ Resumen <- function(BD, respuesta, s) {
   nom_V <- c()
   fram <- data.frame()
   varT <- "Media (Sd)/Mediana(RIC)"
-  Variable <- c()  # INICIALIZAR AQUÍ
+  Variable <- c()
   
   if (s == 1) {
+    # ... (El código para s=1 se mantiene igual)
     for (i in 1:n) {
       Res <- Des_Cuanti(BD[, i], respuesta)
       fram <- rbind(fram, Res)
@@ -251,16 +252,26 @@ Resumen <- function(BD, respuesta, s) {
                     names(BD)[i],varT)
     }
   } 
-  else {
+  else { # Caso s=2 (Univariado)
     for (i in 1:n) {
       Res <- DesG(BD[, i])
-      fram <- rbind(fram, Res)
-      nom_V <- c(nom_V, rep(names(BD)[i], 1))
-      Variable <- c(Variable,varT)
+      
+      # *** MODIFICACIÓN AQUÍ: Extrae el componente 'Medida' y lo convierte a data.frame
+      # para asegurar la consistencia de las columnas.
+      Res_Medida <- as.data.frame(Res$Medida) 
+      
+      # Asegurar que el data.frame vacío 'fram' tenga nombres de columna antes del primer rbind
+      if(i == 1) {
+          fram <- setNames(data.frame(matrix(ncol = ncol(Res_Medida), nrow = 0)), names(Res_Medida))
+      }
+      
+      fram <- rbind(fram, Res_Medida) # <-- Ahora hace rbind con un data.frame de 1 fila
+      
+      nom_V <- c(nom_V, names(BD)[i]) # Solo un nombre de variable por resumen univariado
+      Variable <- c(Variable, varT)
     }
   }
-  return(cbind(Variable,fram, nom_V))
-  #return(list(fram,nom_V))
+  return(cbind(Variable, fram, nom_V))
 }
 
 
