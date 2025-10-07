@@ -588,7 +588,7 @@ CV_por_grupo <- function(BD, grupo) {
 }
 
 
-AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
+AnalisisCompleto2 <- function(BD, respuesta = NULL, s = 1) {
   BD <- as.data.frame(BD)
   tipos <- tipoV(BD)  # usa tus reglas para Cuantis y Cualis
 
@@ -664,3 +664,79 @@ AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
   R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
   R
 }
+
+
+AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
+  BD <- as.data.frame(BD)
+  tipos <- tipoV(BD)  # tus reglas
+
+  # preparar respuesta (nombre o vector); en bivariado => factor
+  if (s == 1) {
+    if (is.null(respuesta)) stop("Para s = 1 (bivariado) debes pasar 'respuesta'.")
+    if (is.character(respuesta) && length(respuesta) == 1 && respuesta %in% names(BD)) {
+      respuesta_vec <- BD[[respuesta]]
+    } else {
+      respuesta_vec <- respuesta
+    }
+    if (!is.factor(respuesta_vec)) respuesta_vec <- factor(respuesta_vec)
+  } else {
+    respuesta_vec <- NULL
+  }
+
+  piezas <- list()
+
+  # >>> recorre en el ORDEN ORIGINAL <<<
+  for (nm in names(BD)) {
+    tipo_nm <- if (nm %in% tipos$Cuantis) "Cuantitativa" else if (nm %in% tipos$Cualis) "Cualitativa" else NA
+    if (is.na(tipo_nm)) next
+
+    Tab <- tryCatch({
+      if (tipo_nm == "Cuantitativa") {
+        Resumen(BD[, nm, drop = FALSE], respuesta_vec, s)
+      } else {
+        tablas(BD[, nm, drop = FALSE],  respuesta_vec, s)
+      }
+    }, error = function(e) NULL)
+
+    if (is.null(Tab) || nrow(Tab) == 0) next
+
+    # armonizar nombres de salida
+    nms <- names(Tab)
+    nms[nms == "nom_Variable"] <- "Variable"
+    nms[nms == "V1"] <- "Estadístico"
+    nms[nms == "rownames(Cual)"] <- "Estadístico"
+    nms[nms == "rownames(Tabla_bivariada)"] <- "Estadístico"
+    names(Tab) <- nms
+
+    if (!"Variable" %in% names(Tab))    Tab$Variable <- nm
+    if (!"Estadístico" %in% names(Tab)) Tab$Estadístico <- NA
+
+    Tab$Tipo <- tipo_nm
+    piezas[[length(piezas) + 1]] <- Tab
+  }
+
+  if (length(piezas) == 0) return(data.frame())
+
+  # unir con columnas dispares
+  all_cols <- Reduce(union, lapply(piezas, names))
+  piezas <- lapply(piezas, function(df) {
+    faltan <- setdiff(all_cols, names(df))
+    for (cc in faltan) df[[cc]] <- NA
+    df[, all_cols, drop = FALSE]
+  })
+  R <- do.call(rbind, piezas)
+  rownames(R) <- NULL
+
+  # orden final: Variable | Estadístico | ... | Tipo
+  primero <- c("Variable", "Estadístico")
+  otros   <- setdiff(names(R), c(primero, "Tipo"))
+  R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
+
+  # (seguro extra) reordenar filas por el orden de la BD si hiciera falta
+  if ("Variable" %in% names(R)) {
+    R <- R[order(match(R$Variable, names(BD))), , drop = FALSE]
+  }
+
+  R
+}
+
