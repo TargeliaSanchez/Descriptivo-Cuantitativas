@@ -107,6 +107,7 @@ DesG <- function(Variable) {
 ####### descriptivo bivariado 
 
 ## ANÁLISIS DESCRIPTIVO BIVARIADO (con subset para n>=2)
+## ANÁLISIS DESCRIPTIVO BIVARIADO (con subset para n>=2)
 Des_Cuanti <- function(Variable, var2) {
   Variable <- as.numeric(Variable)
   var2     <- droplevels(as.factor(var2))  # asegurar factor y limpiar niveles vacíos
