@@ -129,7 +129,7 @@ Des_Cuanti <- function(Variable, var2) {
   if (p_val <= 0.05) {
     # No normal: usar medianas y pruebas no paramétricas
     stats <- calc_stats(Variable, var2,p_val)
-    if (sum(stats$n <= 1)/stats$n >= 0.5) { # sum(stats$n <= 1) >= 1
+    if (sum(stats$n <= 1) >= 1) { # sum(stats$n <= 1) >= 1
       `Valor P` <- NA # Si alguna categoría tiene <= 1 datos, no se puede hacer prueba
     } else if (sum(stats$n == 0) == 0) {
       categorias <- unique(na.omit(var2))
@@ -151,7 +151,7 @@ Des_Cuanti <- function(Variable, var2) {
   } else {
     # Normal: usar medias y pruebas paramétricas
     stats <- calc_stats(Variable, var2,p_val)
-    if (sum(stats$n <= 1)/stats$n >= 0.5) { ######## el valor anterior (sum(stats$n <= 1) >= 1)
+    if (sum(stats$n <= 1) >= 1) { ######## el valor anterior (sum(stats$n <= 1) >= 1)
       `Valor P` <- NA
     } else if (sum(stats$n == 0) == 0) {
       categorias <- unique(na.omit(var2))
