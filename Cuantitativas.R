@@ -505,82 +505,79 @@ CV_por_grupo <- function(BD, grupo) {
 }
 
 
-DescriptivoUnificado <- function(BD, respuesta = NULL, s = 1) {
-  # 1. Asegurar que la BD sea un data.frame
+AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
   BD <- as.data.frame(BD)
-  
-  # 2. Obtener la clasificación de las variables
-  tipos <- tipoV(BD)
-  
-  # 3. Preparar data.frames para acumular resultados
-  resultado_cuantis <- data.frame()
-  resultado_cualis <- data.frame()
-  
-  # 4. Procesar Variables Cuantitativas
-  if (length(tipos$Cuantis) > 0) {
-    BD_cuantis <- BD[, tipos$Cuantis, drop = FALSE]
-    
-    # Llama a tu función Resumen.
-    # Nota: Resumen ya maneja el caso univariado (s=2) o bivariado (s=1).
-    resultado_cuantis <- Resumen(BD = BD_cuantis, respuesta = respuesta, s = s)
-    # Renombrar 'nom_Variable' a 'Variable' y 'Variable' a 'Estadístico' para claridad
-    colnames(resultado_cuantis)[colnames(resultado_cuantis) == "nom_Variable"] <- "Variable"
-    colnames(resultado_cuantis)[colnames(resultado_cuantis) == "Variable"] <- "Estadístico"
-  }
-  
-  # 5. Procesar Variables Cualitativas
-  if (length(tipos$Cualis) > 0) {
-    BD_cualis <- BD[, tipos$Cualis, drop = FALSE]
-    
-    # Llama a tu función tablas.
-    # Nota: tablas ya maneja el caso univariado (s=2) o bivariado (s=1).
-    resultado_cualis <- tablas(BD = BD_cualis, respuesta = respuesta, s = s)
-    # Renombrar 'nom_Variable' a 'Variable'
-    colnames(resultado_cualis)[colnames(resultado_cualis) == "nom_Variable"] <- "Variable"
-    colnames(resultado_cualis)[colnames(resultado_cualis) == "rownames(Cual)"] <- "Estadístico"
-    colnames(resultado_cualis)[colnames(resultado_cualis) == "rownames(Tabla_bivariada)"] <- "Estadístico"
-  }
-  
-  # 6. Combinar y formatear la salida final
-  # Ajustar nombres de columnas antes de combinar para asegurar que coincidan
-  
-  # Si solo hay un tipo de variable, devuelve ese resultado
-  if (nrow(resultado_cuantis) == 0) {
-    ResultadoFinal <- resultado_cualis
-  } else if (nrow(resultado_cualis) == 0) {
-    ResultadoFinal <- resultado_cuantis
+  tipos <- tipoV(BD)  # usa tus reglas para Cuantis y Cualis
+
+  # Preparar respuesta (por nombre o vector); en bivariado, factor
+  if (s == 1) {
+    if (is.null(respuesta)) stop("Para s = 1 (bivariado) debes pasar 'respuesta'.")
+    if (is.character(respuesta) && length(respuesta) == 1 && respuesta %in% names(BD)) {
+      respuesta_vec <- BD[[respuesta]]
+    } else {
+      respuesta_vec <- respuesta
+    }
+    if (!is.factor(respuesta_vec)) respuesta_vec <- factor(respuesta_vec)
   } else {
-    # Para poder usar rbind, las columnas deben coincidir.
-    # Dado que las salidas de 'Resumen' (cuanti) y 'tablas' (cuali) 
-    # tienen estructuras de columna muy diferentes, se sugiere un manejo
-    # más robusto, pero para unirlos de forma simple por ahora:
-    
-    # Tomar la unión de nombres de columnas
-    nombres_union <- union(colnames(resultado_cuantis), colnames(resultado_cualis))
-    
-    # Añadir columnas faltantes con NA
-    for (col in nombres_union) {
-      if (!(col %in% colnames(resultado_cuantis))) {
-        resultado_cuantis[[col]] <- NA
-      }
-      if (!(col %in% colnames(resultado_cualis))) {
-        resultado_cualis[[col]] <- NA
+    respuesta_vec <- NULL
+  }
+
+  piezas <- list()
+
+  ## --- Cuantitativas ---
+  if (length(tipos$Cuantis) > 0) {
+    for (nm in tipos$Cuantis) {
+      Tab <- tryCatch(
+        Resumen(BD[, nm, drop = FALSE], respuesta_vec, s),
+        error = function(e) NULL
+      )
+      if (!is.null(Tab) && nrow(Tab) > 0) {
+        # armoniza nombres
+        colnames(Tab)[colnames(Tab) == "nom_Variable"] <- "Variable"
+        colnames(Tab)[colnames(Tab) == "V1"] <- "Estadístico"
+        Tab$Tipo <- "Cuantitativa"
+        piezas[[length(piezas) + 1]] <- Tab
       }
     }
-    
-    # Reordenar columnas para que coincidan
-    resultado_cuantis <- resultado_cuantis[, nombres_union]
-    resultado_cualis <- resultado_cualis[, nombres_union]
-    
-    # Combina verticalmente
-    ResultadoFinal <- rbind(resultado_cuantis, resultado_cualis)
   }
-  
-  # 7. Limpieza y retorno
-  # Reordenar: Variable, Estadístico, y luego los resultados
-  columnas_finales <- c("Variable", "Estadístico", setdiff(colnames(ResultadoFinal), c("Variable", "Estadístico")))
-  return(ResultadoFinal[, columnas_finales])
+
+  ## --- Cualitativas ---
+  if (length(tipos$Cualis) > 0) {
+    for (nm in tipos$Cualis) {
+      Tab <- tryCatch(
+        tablas(BD[, nm, drop = FALSE], respuesta_vec, s),
+        error = function(e) NULL
+      )
+      if (!is.null(Tab) && nrow(Tab) > 0) {
+        # posibles nombres que salen de 'tablas'
+        nms <- names(Tab)
+        nms[nms == "nom_Variable"] <- "Variable"
+        nms[nms == "rownames(Cual)"] <- "Estadístico"
+        nms[nms == "rownames(Tabla_bivariada)"] <- "Estadístico"
+        names(Tab) <- nms
+        if (!"Variable" %in% names(Tab))     Tab$Variable <- nm
+        if (!"Estadístico" %in% names(Tab))  Tab$Estadístico <- NA
+        Tab$Tipo <- "Cualitativa"
+        piezas[[length(piezas) + 1]] <- Tab
+      }
+    }
+  }
+
+  if (length(piezas) == 0) return(data.frame())
+
+  # Unir con columnas diferentes (union de nombres + relleno con NA)
+  all_cols <- Reduce(union, lapply(piezas, names))
+  piezas <- lapply(piezas, function(df) {
+    faltan <- setdiff(all_cols, names(df))
+    for (cc in faltan) df[[cc]] <- NA
+    df[, all_cols, drop = FALSE]
+  })
+  R <- do.call(rbind, piezas)
+  rownames(R) <- NULL
+
+  # Orden final: Variable | Estadístico | ... | Tipo
+  primero <- c("Variable", "Estadístico")
+  otros   <- setdiff(names(R), c(primero, "Tipo"))
+  R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
+  R
 }
-
-
-
