@@ -505,395 +505,79 @@ CV_por_grupo <- function(BD, grupo) {
 }
 
 
-setwd("C:/Users/ecom3543/Desktop/Análisis/117 - Malaria Complicada")
-source("https://raw.githubusercontent.com/TargeliaSanchez/Descriptivo-Cuantitativas/main/Cuantitativas.R")
+AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
+  BD <- as.data.frame(BD)
+  tipos <- tipoV(BD)  # usa tus reglas para Cuantis y Cualis
 
-
-library(tidyverse)
-library(tidyr)
-library(dplyr)
-library(readxl)
-library(plyr)
-CRF_ADULTOS_ <- read_excel("adultos crf +nuevos 25df0150eb134bd38dae25c56ade126b.xlsx")
-Pediatricos_CRF_<- read_excel("pediátrico crf + nuevos c17e81af965843d3aab239b570daaba9.xlsx")
-#---------- Adultos
-CRF_ADULTOS<- CRF_ADULTOS_%>%
-  mutate(BD = if_else(Embarazoactual=="Yes","EMBARAZADAS","ADULTOS"),
-         BD2 =if_else(Embarazoactual=="Yes","EMBARAZADAS 1","ADULTOS"))%>%
-  filter(!UniqueKey%in%c(4,13,49))
-#---------- Pediátricos
-Pediatricos_CRF<- Pediatricos_CRF_%>%
-  mutate(BD = if_else(Embarazoactual=="Yes","EMBARAZADAS","PEDIATRICOS"),
-         BD2 = if_else(Embarazoactual=="Yes","EMBARAZADAS 2","PEDIATRICOS"))
-#-------------------------------------------------------------------------------
-#-------------------------------------------------------------------------------
-BD_completa<-bind_rows(CRF_ADULTOS,Pediatricos_CRF)
-#writexl::write_xlsx(BD_completa,"Base de datos malaria unificada.xlsx")
-
-BD_malaria<-BD_completa%>%
-  mutate(Cualescomorbilidades = if_else(Cualescomorbilidades=="CA DE TIROIDES",
-                                        "Cáncer de tiroides", Cualescomorbilidades),
-    Procedencia = case_when(
-    grepl("Valle Del C|buga|cartago|palmira|buenaventura|BUENVENTURA", Procedencia,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Nariño|magui", Procedencia,ignore.case=T) ~ "Nariño",
-    grepl("Choc[oó]|quibd[oó]|CHOCÓ", Procedencia,ignore.case=T) ~ "Chocó",
-    grepl("Cali|dagua", Procedencia,ignore.case=T) ~ "Valle del Cauca",
-    grepl(", Cauca|corinto|timbiqu[ií]|miranda", Procedencia,ignore.case=T) ~ "Cauca",
-    grepl(", Valle|JAMUNDÍ", Procedencia,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Risaralda", Procedencia,ignore.case=T) ~ "Otro",
-    grepl("Antioquia", Procedencia,ignore.case=T) ~ "Otro",
-    grepl("Huila", Procedencia,ignore.case=T) ~ "Otro",
-    grepl("Venezuela", Procedencia,ignore.case=T) ~ "Otro",
-    grepl("Caquet|cordoba", Procedencia,ignore.case=T) ~ "Otro",
-    grepl("Caloto|CAUCA", Procedencia,ignore.case=T) ~ "Cauca",
-    TRUE ~ Procedencia  # Mantiene el valor original si no coincide con ninguna condición
-  ),
-  
-  Lugardeviaje = case_when(
-    grepl("Valle Del C|buga|cartago|palmira|buenaventura", Lugardeviaje,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Nariño|magui", Lugardeviaje,ignore.case=T) ~ "Nariño",
-    grepl("Choc[oó]|quibd[oó]|CHOCÓ", Lugardeviaje,ignore.case=T) ~ "Chocó",
-    grepl("Cali|dagua", Lugardeviaje,ignore.case=T) ~ "Valle del Cauca",
-    grepl(", Cauca|corinto|timbiqu[ií]|miranda|Guapi|pat[íi]a", Lugardeviaje,ignore.case=T) ~ "Cauca",
-    grepl(", Valle", Lugardeviaje,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Risaralda", Lugardeviaje,ignore.case=T) ~ "Otro",
-    grepl("Antioquia", Lugardeviaje,ignore.case=T) ~ "Otro",
-    grepl("Huila", Lugardeviaje,ignore.case=T) ~ "Otro",
-    grepl("Venezuela", Lugardeviaje,ignore.case=T) ~ "Otro",
-    grepl("Caquet|c[óo]rdoba", Lugardeviaje,ignore.case=T) ~ "Otro",
-    grepl("costa pac[íi]fica", Lugardeviaje,ignore.case=T) ~ "Costa Pacífica",
-    grepl("amazonas|putumayo", Lugardeviaje,ignore.case=T) ~ "Amazonas",
-    grepl("Caloto|CAUCA", Lugardeviaje,ignore.case=T) ~ "Cauca",
-    TRUE ~ Lugardeviaje  # Mantiene el valor original si no coincide con ninguna condición
-  ),
-  
-  DeptoOrigen = case_when(
-    grepl("Valle Del C|buga|cartago|palmira|buenaventura|BUENVENTURA", Ciudaddeorigen,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Nariño|magui", Ciudaddeorigen,ignore.case=T) ~ "Nariño",
-    grepl("Choc[oó]|quibd[oó]|CHOCÓ", Ciudaddeorigen,ignore.case=T) ~ "Chocó",
-    grepl("Cali|dagua", Ciudaddeorigen,ignore.case=T) ~ "Valle del Cauca",
-    grepl(", Cauca|corinto|timbiqu[ií]|miranda|Guapi|pat[íi]a", Ciudaddeorigen,ignore.case=T) ~ "Cauca",
-    grepl(", Valle", Ciudaddeorigen,ignore.case=T) ~ "Valle del Cauca",
-    grepl("Risaralda", Ciudaddeorigen,ignore.case=T) ~ "Otro",
-    grepl("Antioquia", Ciudaddeorigen,ignore.case=T) ~ "Otro",
-    grepl("Huila|bucarasica|manizales|cundinamarca", Ciudaddeorigen,ignore.case=T) ~ "Otro",
-    grepl("Venezuela", Ciudaddeorigen,ignore.case=T) ~ "Otro",
-    grepl("Caquet|c[óo]rdoba", Ciudaddeorigen,ignore.case=T) ~ "Otro",
-    grepl("costa pac[íi]fica|costa", Ciudaddeorigen,ignore.case=T) ~ "Costa",
-    grepl("amazonas|putumayo", Ciudaddeorigen,ignore.case=T) ~ "Amazonas",
-    grepl("Caloto|CAUCA", Ciudaddeorigen,ignore.case=T) ~ "Cauca",
-    TRUE ~ Ciudaddeorigen  # Mantiene el valor original si no coincide con ninguna condición
-  ),
-  Embarazoactual= if_else(Sexo=="Femenino",Embarazoactual,NA),
-  Parasitemia=as.numeric(Parasitemia),
-  Hemoglobina=as.numeric(Hemoglobina),
-  Hematocrito=as.numeric(Hematocrito),
-  VolumencorpuscularmedioVCM=as.numeric(VolumencorpuscularmedioVCM),
-  NitrgenoureicoensangreBUN =as.numeric(NitrgenoureicoensangreBUN), 
-  Plaquetasensangre=as.numeric(Plaquetasensangre),
-  Fechadeingresoahospitalizacin=as.Date(Fechadeingresoahospitalizacin,format="%d/%b/%Y"),
-  Fechadeegresoahospitalizacin=as.Date(Fechadeegresoahospitalizacin,format="%d/%b/%Y"),
-  Primercontrol=as.character(Primercontrol),Segundocontrol=as.character(Segundocontrol),
-  Gravidez=as.character(Gravidez), Partos=as.character(Partos),
-  Abortos=as.character(Abortos),Cesáreas=as.character(Cesáreas),
-  Vivos=as.character(Vivos), 
-  Nmerodeepisodiosdeconvulsiones = as.character(Nmerodeepisodiosdeconvulsiones),
-  Nmerodeepisodiosdemalariacomplicada=as.character(Nmerodeepisodiosdemalariacomplicada),
-  EscaladeGlasgow=as.character(EscaladeGlasgow),Tercercontrol=as.character(Tercercontrol))%>%
-  mutate(Metododiagnsticodengue=toupper(Metododiagnsticodengue))%>%
-  mutate(
-    Met_dx_dengue_Agrupado = case_when(
-      
-      # 1. INFECCIÓN SECUNDARIA/TARDÍA (IgM y IgG Positivos)
-      # Busca explícitamente "IgM" y "IgG" y "Positivo" en la misma cadena.
-      # Esto debe ir primero.
-      grepl("IGM E IGG POSITIVO|IGM E IGG POSITIVOS|(IGM\\+\\s*E\\s*IGG\\+)", 
-            Metododiagnsticodengue, 
-            ignore.case = TRUE) ~ "IgM e IgG +",
-      
-      # 2. INFECCIÓN AGUDA TEMPRANA (NS1 Positivo)
-      # Captura cualquier mención de NS1 Positivo.
-      grepl("IGM Y NS1 POSITIVO", Metododiagnsticodengue, ignore.case = TRUE) ~ "IGM y NS1 +",
-      
-      # 3. INFECCIÓN PASADA (Solo IgG)
-      # Captura IgG+ o IgG Positivo, y solo aplica si no se cumplió la condición #1
-      grepl("IGG\\+|IGG\\s*POSITIV[AO]?", Metododiagnsticodengue, ignore.case = TRUE) ~ "IgG +",
-      
-      # 4. INFECCIÓN PRIMARIA/RECIENTE (Solo IgM)
-      # Si llega aquí, significa que NO cumple #1 (IgG/IgM juntos) ni #2 (NS1 Positivo)
-      # ni #3 (IgG solo), por lo que cualquier caso con IgM Positivo es "Solo IgM".
-      grepl("IGM\\+|IGM\\s*POSITIVA?|IGM +|IGM POSITIVO", Metododiagnsticodengue, ignore.case = TRUE) ~ "IgM +",
-      
-      # 5. Si no se clasificó, asignar como "No_Clasificado"
-      TRUE ~ "No_Clasificado"
-    )
-  )%>%
-  relocate(DeptoOrigen, .before = Ciudaddeorigen)%>%
-  dplyr::select(-c(Ciudaddeorigen,Metododiagnsticodengue))%>%
-  mutate(
-    # Recodificación de las variables de Conteo
-    Gravidez = case_when(
-      Gravidez == 0 ~ "Cero",
-      Gravidez == 1 ~ "Uno",
-      Gravidez >= 2 ~ "Dos o Más",
-      TRUE ~ NA_character_ # Para manejar los valores NA originales
-    ),
-    Partos = case_when(
-      Partos == 0 ~ "Cero",
-      Partos == 1 ~ "Uno",
-      Partos >= 2 ~ "Dos o Más",
-      TRUE ~ NA_character_ # Para manejar los valores NA originales
-    ),
-    
-    # Recodificación para Abortos (se puede replicar para Partos, Cesáreas, Vivos)
-    Abortos = case_when(
-      Abortos == 0 ~ "Cero",
-      Abortos == 1 ~ "Uno",
-      Abortos >= 2 ~ "Dos o Más",
-      TRUE ~ NA_character_
-    ),
-    Cesáreas = case_when(
-      Cesáreas == 0 ~ "Cero",
-      Cesáreas == 1 ~ "Uno",
-      Cesáreas >= 2 ~ "Dos o Más",
-      TRUE ~ NA_character_
-    ),
-    Vivos = case_when(
-      Vivos == 0 ~ "Cero",
-      Vivos == 1 ~ "Uno",
-      Vivos >= 2 ~ "Dos o Más",
-      TRUE ~ NA_character_
-    ),
-    # Recodificación de la Escala de Glasgow (Clasificación Clínica Estándar)
-    EscaladeGlasgow = case_when(
-      EscaladeGlasgow >= 13 ~ "Leve (13-15)",
-      EscaladeGlasgow >= 9 & EscaladeGlasgow <= 12 ~ "Moderada (9-12)",
-      EscaladeGlasgow >= 3 & EscaladeGlasgow <= 8 ~ "Severa (3-8)",
-      TRUE ~ NA_character_ # Para manejar los valores NA
-    ),
-    
-    # Recodificación del Número de episodios de convulsiones
-    Nmerodeepisodiosdeconvulsiones = case_when(
-      `Nmerodeepisodiosdeconvulsiones` == 0 ~ "Ninguno",
-      `Nmerodeepisodiosdeconvulsiones` >= 1 ~ "Al menos uno",
-      TRUE ~ NA_character_
-    )
-  )%>%
-  mutate(
-    Descripciondelhallazgo = case_when(
-      grepl("No derrames o|Sin hallazgos|SIN ALTERACIONES|NO CONSOLIDACIÓN|NO HALLAZGOS|SIN HALLAZGO|SIN EVIDENCIA",
-            Descripciondelhallazgo, ignore.case = TRUE) ~ "NORMAL",
-      grepl("INFILTRADOS|INFILTRADO", 
-            Descripciondelhallazgo, ignore.case = TRUE) ~ "INFILTRADO",
-      grepl("DERRAME PLEURAL", 
-            Descripciondelhallazgo, ignore.case = TRUE) ~ "DERRAME PLEURAL",
-      grepl("CEFALIZACIÓN", 
-            Descripciondelhallazgo, ignore.case = TRUE) ~ "CEFALIZACIÓN DEL FLUJO",
-      TRUE ~ Descripciondelhallazgo
-    )
-  ) %>%
-  mutate(
-    Indiquecualotrotipodesangrado = case_when(
-      grepl("HEMATOQUEZIA", Indiquecualotrotipodesangrado, ignore.case = TRUE) ~ "HEMATOQUEZIA",
-      grepl("GINGIVORRAGIA", Indiquecualotrotipodesangrado, ignore.case = TRUE) ~ "GINGIVORRAGIA",
-      grepl("HEMATURIA", Indiquecualotrotipodesangrado, ignore.case = TRUE) ~ "HEMATURIA",
-      grepl("HEMOPTISIS", Indiquecualotrotipodesangrado, ignore.case = TRUE) ~ "HEMOPTISIS",
-      grepl("MENSTRUACIÓN", Indiquecualotrotipodesangrado, ignore.case = TRUE) ~ "MENSTRUACIÓN",
-      TRUE ~ "OTRO"
-    )
-  )#%>%filter(!Sexo=="Intersexual")
-
-#### omitiendo la infexión mixta de la especie de malaria  
-BD_malaria<-BD_malaria%>%
-  filter(!c(is.na(Especiedemalaria)|Especiedemalaria=="Infección mixta"))
-#------------------------------------
-#       Establecer la función 
-#------------------------------------
-Analisis_varias_BD <- function(data, filtroData, filtroVar, variables, respuesta, s) {
-  R1 <- data.frame()
-  for (i in 1:length(filtroData)) {
-    # 1. Definir la condición de filtrado
-    cond = filtroVar == filtroData[i]
-    # 2. Obtener el subconjunto de datos para variables
-    base_variables <- data[cond, variables, drop = FALSE]
-    # 3. Obtener el subconjunto de datos para la respuesta
-    # IMPORTANTE: Aplicar 'cond' a 'respuesta'
-    respuesta_filtrada <- respuesta[cond]
-    # 4. Llamar a la función 'tablas' con los datos filtrados
-    tabla_1 <- tablas(base_variables, respuesta_filtrada, s)
-    # 5. Acumular resultados
-    # Asegúrate de que la columna añadida tenga un nombre consistente
-    R1 <- rbind(R1, cbind(tabla_1, Grupo = filtroData[i]))
+  # Preparar respuesta (por nombre o vector); en bivariado, factor
+  if (s == 1) {
+    if (is.null(respuesta)) stop("Para s = 1 (bivariado) debes pasar 'respuesta'.")
+    if (is.character(respuesta) && length(respuesta) == 1 && respuesta %in% names(BD)) {
+      respuesta_vec <- BD[[respuesta]]
+    } else {
+      respuesta_vec <- respuesta
+    }
+    if (!is.factor(respuesta_vec)) respuesta_vec <- factor(respuesta_vec)
+  } else {
+    respuesta_vec <- NULL
   }
-  return(R1)
+
+  piezas <- list()
+
+  ## --- Cuantitativas ---
+  if (length(tipos$Cuantis) > 0) {
+    for (nm in tipos$Cuantis) {
+      Tab <- tryCatch(
+        Resumen(BD[, nm, drop = FALSE], respuesta_vec, s),
+        error = function(e) NULL
+      )
+      if (!is.null(Tab) && nrow(Tab) > 0) {
+        # armoniza nombres
+        colnames(Tab)[colnames(Tab) == "nom_Variable"] <- "Variable"
+        colnames(Tab)[colnames(Tab) == "V1"] <- "Estadístico"
+        Tab$Tipo <- "Cuantitativa"
+        piezas[[length(piezas) + 1]] <- Tab
+      }
+    }
+  }
+
+  ## --- Cualitativas ---
+  if (length(tipos$Cualis) > 0) {
+    for (nm in tipos$Cualis) {
+      Tab <- tryCatch(
+        tablas(BD[, nm, drop = FALSE], respuesta_vec, s),
+        error = function(e) NULL
+      )
+      if (!is.null(Tab) && nrow(Tab) > 0) {
+        # posibles nombres que salen de 'tablas'
+        nms <- names(Tab)
+        nms[nms == "nom_Variable"] <- "Variable"
+        nms[nms == "rownames(Cual)"] <- "Estadístico"
+        nms[nms == "rownames(Tabla_bivariada)"] <- "Estadístico"
+        names(Tab) <- nms
+        if (!"Variable" %in% names(Tab))     Tab$Variable <- nm
+        if (!"Estadístico" %in% names(Tab))  Tab$Estadístico <- NA
+        Tab$Tipo <- "Cualitativa"
+        piezas[[length(piezas) + 1]] <- Tab
+      }
+    }
+  }
+
+  if (length(piezas) == 0) return(data.frame())
+
+  # Unir con columnas diferentes (union de nombres + relleno con NA)
+  all_cols <- Reduce(union, lapply(piezas, names))
+  piezas <- lapply(piezas, function(df) {
+    faltan <- setdiff(all_cols, names(df))
+    for (cc in faltan) df[[cc]] <- NA
+    df[, all_cols, drop = FALSE]
+  })
+  R <- do.call(rbind, piezas)
+  rownames(R) <- NULL
+
+  # Orden final: Variable | Estadístico | ... | Tipo
+  primero <- c("Variable", "Estadístico")
+  otros   <- setdiff(names(R), c(primero, "Tipo"))
+  R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
+  R
 }
-#------------------------------------
-#       UNIVARIADO - BIVARIADO
-#------------------------------------ 
-Cualis<-tipoV(BD_malaria)$Cualis
-Cuantis<-tipoV(BD_malaria)$Cuantis
-Cun<-Cuantis
-R1<-data.frame()
-BD<-unique(BD_malaria$BD)
-BD2<-unique(BD_malaria$BD2)
-# Cualis
-Bi_cual1<-Analisis_varias_BD(data = BD_malaria, filtroData = BD, filtroVar = BD_malaria$BD,
-                            variables = Cualis[-c(1:2)], respuesta= BD_malaria$Especiedemalaria,
-                            s = 1)
-Bi_cual2
-writexl::write_xlsx(Bi_cual,"UNIVARIADO.xlsx")
-
-
- 
-for (i in 1:length(BD)) {
-  cond= BD_malaria$BD==BD[i]
-  tabla_1<-tablas(BD_malaria[cond, Cualis[-c(1)]],BD_malaria$Especiedemalaria,2)
-  R1<-rbind(R1, cbind(tabla_1,BD[i]))
-}
-writexl::write_xlsx(R1,"UNIVARIADO.xlsx")
-# Cuantis
-R<-data.frame()
-BD<-c("EMBARAZADAS", "ADULTOS", "PEDIATRICOS")
-for (i in 1:3) {
-  cond= BD_malaria$BD==BD[i]
-  base<-BD_malaria[cond,]
-  tabla_1<-Resumen(base[,Cuantis],base$Especiedemalaria,1)
-  R<-rbind(R, cbind(tabla_1,BD[i]))
-}
-writexl::write_xlsx(R,"UNIVARIADO.xlsx")
-#------------------------------------
-#              BIVARIADO
-#          Especie de malaria
-#------------------------------------ 
-Bi_cual<-Analisis_varias_BD(data = BD_malaria, filtroData = BD, filtroVar = BD_malaria$BD,
-                   variables = Cualis[-c(1:2)], respuesta= BD_malaria$Especiedemalaria,
-                   s = 1)
-writexl::write_xlsx(Bi_cual,"UNIVARIADO.xlsx")
-
-
-
-
-#--------------------------------------------
-#         ADULTOS SIN EMBARAZADAS
-#--------------------------------------------
-# Especie de malaria
-# CUALITATIVAS
-BD_Adultos<-CRF_ADULTOS[CRF_ADULTOS$BD=="ADULTOS",]
-Cualis<-tipoV(BD_Adultos)$Cualis
-tabla_Adul<-tablas(BD_Adultos[,Cualis[-(1)]],BD_Adultos$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Adul,"Adultos.xlsx")
-
-tabla_Adul<-Resumen(BD_Adultos[,Cuantis[-1]],BD_Adultos$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Adul,"Adultos.xlsx")
-# Malaria complicada
-tabla_Adul<-tablas(BD_Adultos[,Cualis],BD_Adultos$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Adul,"Adultos.xlsx")
-
-tabla_Adul<-Resumen(BD_Adultos[,Cuantis],BD_Adultos$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Adul,"Adultos.xlsx")
-
-#--------------------------------------------
-#         ADULTOS NO EMBARAZADAS
-#--------------------------------------------
-
-tipoV(BD_Adultos)$Tipo->A
-Cualis<-names(A[A=="character"])
-BD_Adultos<-BD_malaria%>%
-  filter(BD=="ADULTOS"|BD_Adultos$Embarazoactual=="No"|
-           is.na(BD_Adultos$Embarazoactual)|
-           !Especiedemalaria=="")
-
-#tabla_Adul2<-tablas(BD_Adultos2[,Cualis],BD_Adultos2$Especiedemalaria,1)
-#writexl::write_xlsx(tabla_Adul2,"Adultos2.xlsx")
-
-#tipoV(BD_Adultos)$Tipo->B 
-#Cuantis<-names(A[A=="numeric"])
-#tabla_Adul2<-Resumen(BD_Adultos2[,Cuantis],BD_Adultos2$Especiedemalaria,1)
-#writexl::write_xlsx(tabla_Adul2,"Adultos.xlsx")
-
-#------------- Malaria complicada
-BD_Adultos3<-BD_malaria%>%
-  filter(Embarazoactual=="No"|is.na(BD_Adultos2$Embarazoactual))%>%
-  filter(!Malariacomplicada=="Missing",
-         BD=="ADULTOS")
-tabla_Adul3<-tablas(BD_Adultos3[,Cualis],BD_Adultos3$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Adul3,"Adultos2.xlsx")
-
-
-tabla_Adul3<-Resumen(BD_Adultos3[,Cuantis],BD_Adultos3$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Adul3,"Adultos2.xlsx")
-
-#--------------------------------------------
-#                  Pediatricos
-#--------------------------------------------
-#tipoV(BD_Adultos)$Tipo->A
-#Cualis<-names(A[A=="character"])
-BD_Ped<-BD_malaria[BD_malaria$BD=="PEDIATRÍCOS",]
-tabla_Ped<-tablas(BD_Ped[,Cualis],BD_Ped$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Ped,"Adultos.xlsx")
-
-
-
-tabla_Ped<-Resumen(BD_Ped[,Cuantis],BD_Ped$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Ped,"Adultos.xlsx")
-
-#--------------------------------------------
-#                  Embarazadas
-#--------------------------------------------
-#tipoV(BD_Adultos)$Tipo->A
-#Cualis<-names(A[A=="character"])
-BD_Emb<-BD_malaria[BD_malaria$Embarazoactual=="Yes",]
-tabla_Emb<-tablas(BD_Emb[,Cualis],BD_Emb$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Emb,"Adultos.xlsx")
-
-tabla_Emb<-Resumen(BD_Emb[,Cuantis],BD_Emb$Especiedemalaria,1)
-writexl::write_xlsx(tabla_Emb,"Adultos.xlsx")
-
-#------- Malaria complicada
-
-tabla_Emb<-tablas(BD_Emb[,Cualis],BD_Emb$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Emb,"Adultos.xlsx")
-
-tabla_Emb<-Resumen(BD_Emb[,Cuantis],BD_Emb$Malariacomplicada,1)
-writexl::write_xlsx(tabla_Emb,"Adultos.xlsx")
-
-
-
-
-
-#--------------------------------------------
-#                  ADULTOS
-#--------------------------------------------
-#tipoV(BD_Adultos)$Tipo->A
-#Cualis<-names(A[A=="character"])
-BD_Adultos<-BD_malaria[BD_malaria$BD=="ADULTOS",]
-tabla_Adul<-Resumen(BD_Adultos[,Cuantis],BD_Adultos$Especiedemalaria,1)
-write.csv(tabla_Adul,"Adultos.csv",fileEncoding = "latin1")
-
-
-
-
-
-
-
-
-
-A
-Cuantis<-names(A[A=="numeric"])
-Calidad<-Resumen(BD_malaria[,Cuantis],BD_malaria$BD,1)
-write.csv(Calidad,"Calidad.csv",fileEncoding = "latin1")
-
-
-
-BD_embarazadas<-BD_malaria[BD_malaria$Embarazoactual=="Yes",]
-
-
-tipoV(BD_embarazadas)$Tipo->A
-Cualis<-names(A[A=="character"])
-#CualisT<-na.omit(tipoV(BD_malaria2)$Cualis)
-
-Calidad<-tablas(BD_embarazadas[,Cualis],BD_embarazadas$BD,1)
-write.csv(Calidad,"Calidad.csv",fileEncoding = "latin1")
-
-
-###############
