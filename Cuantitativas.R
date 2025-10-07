@@ -103,9 +103,91 @@ DesG <- function(Variable) {
   }
 }
 
+#####################################
+####### descriptivo bivariado 
+
+## ANÁLISIS DESCRIPTIVO BIVARIADO (con subset para n>=2)
+Des_Cuanti <- function(Variable, var2) {
+  Variable <- as.numeric(Variable)
+  var2     <- droplevels(as.factor(var2))  # asegurar factor y limpiar niveles vacíos
+  p_val    <- round(PP_val(Variable), 2)   # Evaluar normalidad
+
+  # Función auxiliar para calcular las estadísticas descriptivas por grupo
+  calc_stats <- function(var, grp, p) {
+    if (p <= 0.05) {
+      Med <- tapply(var, grp, median,   na.rm = TRUE)
+    } else {
+      Med <- tapply(var, grp, mean,     na.rm = TRUE)
+    }
+    Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    Q3    <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
+    n     <- tapply(1 - is.na(var), grp, sum)
+    return(list(Med = round(Med, 2),
+                Q1_Sd = round(Q1_Sd, 2),
+                Q3 = round(Q3, 2),
+                n = n))
+  }
+
+  # --- Estadísticos por grupo (para mostrar en tabla) ---
+  stats <- calc_stats(Variable, var2, p_val)
+
+  # --- Selección de niveles válidos (n >= 2) para la prueba ---
+  n_per_group <- stats$n
+  valid_lvls  <- names(n_per_group[n_per_group >= 2])
+
+  if (length(valid_lvls) >= 2) {
+    idx   <- !is.na(Variable) & !is.na(var2) & (var2 %in% valid_lvls)
+    v_sub <- Variable[idx]
+    g_sub <- droplevels(as.factor(var2[idx]))
+
+    # Elegir prueba por normalidad usando el subconjunto
+    if (p_val <= 0.05) {
+      `Valor P` <- if (nlevels(g_sub) == 2) {
+        suppressWarnings(wilcox.test(v_sub ~ g_sub, exact = FALSE)$p.value)
+      } else {
+        kruskal.test(v_sub ~ g_sub)$p.value
+      }
+    } else {
+      `Valor P` <- if (nlevels(g_sub) == 2) {
+        t.test(v_sub ~ g_sub)$p.value
+      } else {
+        anova(aov(v_sub ~ g_sub))$`Pr(>F)`[1]
+      }
+    }
+  } else {
+    `Valor P` <- NA_real_
+  }
+
+  # --- Total univariado de la variable (como ya hacías) ---
+  Total <- DesG(Variable)
+
+  # --- Armar tabla bivariada como en tu versión ---
+  if (p_val <= 0.05) {
+    Bivariate <- rbind(
+      n   = paste0("n = ", stats$n),
+      Res = paste0(stats$Med, " [", stats$Q1_Sd, " - ", stats$Q3, "]")
+    )
+  } else {
+    Bivariate <- rbind(
+      n   = paste0("n = ", stats$n),
+      Res = paste0(stats$Med, " [", stats$Q1_Sd, "]")
+    )
+  }
+
+  categorias <- names(stats$n)
+  resultado_final <- cbind(
+    Bivariate,
+    Total   = Total$Medida,
+    `Valor P` = round(rbind(`Valor P`, `Valor P`), 2)
+  )
+  colnames(resultado_final) <- c(categorias, "Total", "Valor P")
+  return(resultado_final)
+}
+
+
 ##ANÃLISIS DESCRIPTIVO BIVARIADO
 
-Des_Cuanti <- function(Variable, var2) {
+Des_Cuanti_Viejp <- function(Variable, var2) {
   Variable<-as.numeric(Variable)
   p_val <- round(PP_val(Variable),2) # Evaluar normalidad
   
