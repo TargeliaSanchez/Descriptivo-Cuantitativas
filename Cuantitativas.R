@@ -488,8 +488,7 @@ CualiG <- function(Variable, var2, s) {
     TotalG <- c(Totaln, Total)
     
     Prop_TotalG <- c("n = ", Prop_Total)
-    #Cual <- cbind(Tabla_1, TotalG, Prop_T1, Prop_TotalG, Valor_P, Prueba,Variables=c(row.names(Tabla_1)))
-    #A<-list(H_fmt,Tab_total)
+
     
     #row.names(Tabla_bivariada)[1]<-c("Variable",names(Variable)) ############toby aqui es el ajuste
     
@@ -501,8 +500,8 @@ CualiG <- function(Variable, var2, s) {
     Prop_Total <- round(prop.table(Total) * 100, 2)
     Ptotal <- round(Totaln / length(Variable) * 100, 1)
     Prop_T1 <- c(Ptotal, Prop_Total)
-    Cual <- cbind(TotalG, Prop_T1)
-    return(cbind(rownames(Cual),Cual))
+    Cual <-  cbind(TotalG, Prop_T1)
+    return(cbind(rownames(Cual),paste0(TotalG,"(", Prop_T1,")")))##en el paste va cual
   } else {
     T_1 <- table(Variable, var2)
     Orr <- RR(T_1)
@@ -586,7 +585,9 @@ CV_por_grupo <- function(BD, grupo) {
   resultado <- resultado[, c("Variable", setdiff(names(resultado), "Variable"))]
   return(resultado)
 }
-
+#----------------------------------------------------------------------------------
+#                       ANÁLISIS COMPLETO
+#----------------------------------------------------------------------------------
 
 AnalisisCompleto2 <- function(BD, respuesta = NULL, s = 1) {
   BD <- as.data.frame(BD)
