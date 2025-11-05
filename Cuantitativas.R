@@ -203,7 +203,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
     }
     Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     Q3 <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
-    Sd <- sd(Variable, na.rm = TRUE)
+    Sd <- sd(var, na.rm = TRUE)
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
     return(list(Med = round(Med,2), Q1_Sd = round(Q1_Sd,2), Q3 = round(Q3,2), 
