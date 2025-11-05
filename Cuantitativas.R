@@ -91,7 +91,7 @@ DesG <- function(Variable) {
       Res <- paste0(round(Med, 2), " [", round(Q1_Sd, 2), " - ", round(Q3, 2), "]")
     } else {  # Normal
       Med <- mean(Variable, na.rm = TRUE)
-      Q1_Sd <- sd(Variable, na.rm = TRUE)
+      Sd <- sd(Variable, na.rm = TRUE)
       Res <- paste0(round(Med, 2), " [", round(Sd, 2), "]")
     }
     
