@@ -91,7 +91,7 @@ DesG <- function(Variable) {
       Res <- paste0(round(Med, 2), " [", round(Q1_Sd, 2), " - ", round(Q3, 2), "]")
     } else {  # Normal
       Med <- mean(Variable, na.rm = TRUE)
-      Sd <- sd(Variable, na.rm = TRUE)
+      Q1_Sd <- sd(Variable, na.rm = TRUE)
       Res <- paste0(round(Med, 2), " [", round(Q1_Sd, 2), "]")
     }
     
@@ -211,7 +211,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
     return(list(Med = round(Med,2), Q1_Sd = round(Q1_Sd,2), Q3 = round(Q3,2), 
-                n = n, Sd = round(Q1_Sd,2)))
+                n = n))
   }
   
   # Evaluar normalidad y decidir prueba
