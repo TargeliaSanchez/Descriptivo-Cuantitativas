@@ -92,7 +92,7 @@ DesG <- function(Variable) {
     } else {  # Normal
       Med <- mean(Variable, na.rm = TRUE)
       Sd <- sd(Variable, na.rm = TRUE)
-      Res <- paste0(round(Med, 2), " [", round(Sd, 2), "]")
+      Res <- paste0(round(Med, 2), " [", round(Q1_Sd, 2), "]")
     }
     
     Total <- list(
@@ -117,17 +117,19 @@ Des_Cuanti <- function(Variable, var2) {
   calc_stats <- function(var, grp, p) {
     if (p <= 0.05) {
       Med <- tapply(var, grp, median,   na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     } else {
       Med <- tapply(var, grp, mean,     na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, sd, na.rm = TRUE)
     }
-    Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
-    Sd <- tapply(var, grp, sd, na.rm = TRUE)
+    #Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    #Sd <- tapply(var, grp, sd, na.rm = TRUE)
     Q3    <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
     n     <- tapply(1 - is.na(var), grp, sum)
     return(list(Med = round(Med, 2),
                 Q1_Sd = round(Q1_Sd, 2),
                 Q3 = round(Q3, 2),
-                n = n, Sd=round(Sd,2)))
+                n = n, Sd=round(Q1_Sd,2)))
   }
 
   # --- Estadísticos por grupo (para mostrar en tabla) ---
@@ -172,7 +174,7 @@ Des_Cuanti <- function(Variable, var2) {
   } else {
     Bivariate <- rbind(
       n   = paste0("n = ", stats$n),
-      Res = paste0(stats$Med, " [", stats$Sd, "]")
+      Res = paste0(stats$Med, " [", stats$Q1_Sd, "]")
     )
   }
 
@@ -197,17 +199,19 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
   calc_stats <- function(var, grp,p) {
     if(p<=0.5){
       Med <- tapply(var, grp, median, na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     }
     else{
       Med <- tapply(var, grp, mean, na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, sd, na.rm = TRUE)
     }
-    Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    #Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     Q3 <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
-    Sd <- tapply(var, grp, sd, na.rm = TRUE)
+    #Sd <- tapply(var, grp, sd, na.rm = TRUE)
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
     return(list(Med = round(Med,2), Q1_Sd = round(Q1_Sd,2), Q3 = round(Q3,2), 
-                n = n, Sd = round(Sd,2)))
+                n = n, Sd = round(Q1_Sd,2)))
   }
   
   # Evaluar normalidad y decidir prueba
@@ -247,7 +251,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
       }
     }
     Total <- DesG(Variable)
-    Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Sd,"]"))
+    Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
     categorias <- names(stats$n) # NUEVO
     # Combina las matrices
     resultado_final <- cbind(Bivariate, Total = Total$Medida, `Valor P` = round(rbind(`Valor P`, `Valor P`), 2))
