@@ -121,7 +121,7 @@ Des_Cuanti <- function(Variable, var2) {
       Med <- tapply(var, grp, mean,     na.rm = TRUE)
     }
     Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
-    Sd <- sd(Variable, na.rm = TRUE)
+    Sd <- tapply(var, grp, sd, na.rm = TRUE)
     Q3    <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
     n     <- tapply(1 - is.na(var), grp, sum)
     return(list(Med = round(Med, 2),
