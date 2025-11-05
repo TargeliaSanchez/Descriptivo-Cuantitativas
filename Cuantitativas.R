@@ -127,7 +127,7 @@ Des_Cuanti <- function(Variable, var2) {
     return(list(Med = round(Med, 2),
                 Q1_Sd = round(Q1_Sd, 2),
                 Q3 = round(Q3, 2),
-                n = n))
+                n = n, Sd=round(Sd,2)))
   }
 
   # --- Estadísticos por grupo (para mostrar en tabla) ---
