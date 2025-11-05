@@ -121,6 +121,7 @@ Des_Cuanti <- function(Variable, var2) {
       Med <- tapply(var, grp, mean,     na.rm = TRUE)
     }
     Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    Sd <- sd(Variable, na.rm = TRUE)
     Q3    <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
     n     <- tapply(1 - is.na(var), grp, sum)
     return(list(Med = round(Med, 2),
@@ -171,7 +172,7 @@ Des_Cuanti <- function(Variable, var2) {
   } else {
     Bivariate <- rbind(
       n   = paste0("n = ", stats$n),
-      Res = paste0(stats$Med, " [", stats$Q1_Sd, "]")
+      Res = paste0(stats$Med, " [", stats$Sd, "]")
     )
   }
 
@@ -205,7 +206,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
     return(list(Med = round(Med,2), Q1_Sd = round(Q1_Sd,2), Q3 = round(Q3,2), 
-                n = n))
+                n = n, Sd = round(Sd,2)))
   }
   
   # Evaluar normalidad y decidir prueba
