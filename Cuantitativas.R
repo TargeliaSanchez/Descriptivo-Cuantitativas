@@ -117,10 +117,12 @@ Des_Cuanti <- function(Variable, var2) {
   calc_stats <- function(var, grp, p) {
     if (p <= 0.05) {
       Med <- tapply(var, grp, median,   na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     } else {
       Med <- tapply(var, grp, mean,     na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, sd, na.rm = TRUE)
     }
-    Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    #Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     Q3    <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
     n     <- tapply(1 - is.na(var), grp, sum)
     return(list(Med = round(Med, 2),
@@ -196,11 +198,13 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
   calc_stats <- function(var, grp,p) {
     if(p<=0.5){
       Med <- tapply(var, grp, median, na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     }
     else{
       Med <- tapply(var, grp, mean, na.rm = TRUE)
+      Q1_Sd <- tapply(var, grp, sd, na.rm = TRUE)
     }
-    Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
+    
     Q3 <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
