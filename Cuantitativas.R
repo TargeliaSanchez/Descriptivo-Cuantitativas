@@ -203,7 +203,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
     }
     Q1_Sd <- tapply(var, grp, quantile, 0.25, na.rm = TRUE)
     Q3 <- tapply(var, grp, quantile, 0.75, na.rm = TRUE)
-    Sd <- sd(var, na.rm = TRUE)
+    Sd <- tapply(var, grp, sd, na.rm = TRUE)
     n <- tapply(1 - is.na(var), grp, sum) # Contar valores no NA
     NAs <- length(var) - n
     return(list(Med = round(Med,2), Q1_Sd = round(Q1_Sd,2), Q3 = round(Q3,2), 
@@ -247,7 +247,7 @@ Des_Cuanti_Viejp <- function(Variable, var2) {
       }
     }
     Total <- DesG(Variable)
-    Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Q1_Sd,"]"))
+    Bivariate <- rbind( n = paste0("n = ",stats$n), Res=paste0(stats$Med," [",stats$Sd,"]"))
     categorias <- names(stats$n) # NUEVO
     # Combina las matrices
     resultado_final <- cbind(Bivariate, Total = Total$Medida, `Valor P` = round(rbind(`Valor P`, `Valor P`), 2))
