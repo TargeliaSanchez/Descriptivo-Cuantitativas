@@ -3,6 +3,7 @@
 #---------------------------------------------------------------#
 
 tipoV <- function(BD) {
+  
   Exploratorio <- as.data.frame(BD)
   tipo <- sapply(Exploratorio, class)
 
@@ -48,7 +49,44 @@ tipoV <- function(BD) {
   return(Resultado)
 }
 
+tipoV <- function(BD) {
 
+  # ---- Normalización ----
+  if (is.vector(BD) || is.factor(BD)) {
+    Exploratorio <- data.frame(V1 = BD)
+  } else if (is.list(BD) && !is.data.frame(BD)) {
+    Exploratorio <- as.data.frame(BD, stringsAsFactors = FALSE)
+  } else {
+    Exploratorio <- as.data.frame(BD, stringsAsFactors = FALSE)
+  }
+  tipo <- sapply(Exploratorio, class)
+  es_lista <- sapply(Exploratorio, is.list)
+  Exploratorio_atom <- Exploratorio[!es_lista]
+  es_fecha_convertible <- sapply(Exploratorio_atom, function(x) {
+    if (inherits(x, c("Date", "POSIXct", "POSIXt"))) return(TRUE)
+    if (!is.character(x)) return(FALSE)
+
+    suppressWarnings({
+      posibles_fechas <- as.Date(x, format = "%Y-%m-%d")
+      mean(is.na(posibles_fechas)) < 0.99
+    })
+  })
+  es_num_convertible <- sapply(Exploratorio_atom, function(x) {
+    if (inherits(x, c("Date", "POSIXct", "POSIXt"))) return(FALSE)
+
+    suppressWarnings({
+      x_num <- as.numeric(as.character(x))
+      mean(is.na(x_num)) < 0.99
+    })
+  })
+  nombres <- names(Exploratorio_atom)
+
+  nomFecha <- nombres[es_fecha_convertible]
+  nomCuan  <- setdiff(nombres[es_num_convertible | tipo[nombres] == "numeric"], nomFecha)
+  nomCual  <- setdiff(nombres, c(nomCuan, nomFecha))
+  factores <- names(Exploratorio)[tipo == "factor"]
+  listas   <- names(Exploratorio)[es_lista]
+}
 
 
 ###################################################
