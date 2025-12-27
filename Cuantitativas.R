@@ -744,3 +744,54 @@ AnalisisCompleto <- function(BD, respuesta = NULL, s = 1) {
 
   R
 }
+
+
+
+Analisis_especial <- function(
+    vars_vec,
+    char,
+    BD,
+    col_respuesta,
+    col_grupo,
+    col_variable,
+    col_tiempo
+) {
+  
+  R_list <- list()
+  k <- 1
+  
+  for (i in seq_along(vars_vec)) {
+    for (j in seq_along(char)) {
+      
+      tmp <- BD %>%
+        filter(
+          .data[[col_grupo]]    == char[j],
+          .data[[col_variable]] == vars_vec[i]
+        )
+      
+      a <- AnalisisCompleto(
+        tmp[[col_respuesta]],
+        tmp[[col_tiempo]],
+        1
+      )
+      
+      if (!is.null(a) && nrow(a) > 0) {
+        a <- a %>%
+          mutate(
+            Variable   = vars_vec[i],
+            Grupo_char = char[j]
+          )
+        
+        R_list[[k]] <- a
+        k <- k + 1
+      }
+    }
+  }
+  
+  bind_rows(R_list)
+}
+
+
+                    
+
+                    
