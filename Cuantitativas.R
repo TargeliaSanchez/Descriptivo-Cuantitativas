@@ -848,6 +848,26 @@ Analisis_especial <- function(
 }
 
 
+limpiar_fecha <- function(x) {
+  x <- as.character(x)
+  # 1. Eliminar texto (todo lo que no sea número o / o espacio)
+  x <- str_replace_all(x, "[^0-9/ ]", " ")
+  # 2. Extraer la PRIMERA fecha dd/mm/yyyy
+  fecha_dmy <- str_extract(x, "\\b\\d{1,2}/\\d{1,2}/\\d{4}\\b")
+  # 3. Extraer solo año (si no hubo fecha completa)
+  anio <- str_extract(x, "\\b(19|20)\\d{2}\\b")
+  # 4. Detectar números tipo Excel
+  excel_num <- suppressWarnings(as.numeric(x))
+  # 5. Construir fecha final
+  fecha_final <- case_when(
+    !is.na(fecha_dmy) ~ dmy(fecha_dmy),
+    is.na(fecha_dmy) & !is.na(anio) ~ ymd(paste0(anio, "-01-01")),
+    is.na(fecha_dmy) & !is.na(excel_num) ~ as.Date(excel_num, origin = "1899-12-30"),
+    TRUE ~ NA_Date_
+  )  
+  return(fecha_final)
+  }
+
                     
 
                     
