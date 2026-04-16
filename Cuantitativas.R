@@ -161,8 +161,6 @@ resumen_univariado <- function(variable_ind) {
   }
 }
 
-resumen_univariado(base_int358$EDAD)
-
 
 # ==============================================================================
 # FUNcion: resumen_bivariado
@@ -255,7 +253,6 @@ resumen_bivariado <- function(variable_ind, var_respuesta) {
   return(resultado_final)
 }
 
-resumen_bivariado(base_int358$EDAD,base_int358$SEXO)
 
 #===============================================================================
 # Resumen
@@ -316,9 +313,6 @@ Resumen <- function(BD, var_respuesta, s=1) {
                ))
 }
 
-#Resumen(base_int358,base_int358$SEXO,2)
-Resumen(base_int358$`SESIONES REALIZADAS`,base_int358$SEXO,2)
-Resumen(base_int358$`SESIONES REALIZADAS`,base_int358$SEXO,1)
 
 #===============================================================================
 # Funcion para realizar correlacion en formato largo
@@ -418,9 +412,6 @@ freq_esperada<-function(Table){
   margin.table(Table,2)->c
   cbind(f*c[1]/margin.table(Table), f*c[2]/margin.table(Table))
 }
-
-tabla <- table(base_int358$SEXO,base_int358$SEXO)
-freq_esperada(tabla)
 
 #===============================================================================
 # prueaba_asociacion 
@@ -557,8 +548,7 @@ CualiG <- function(variable_ind, var_respuesta, s=1) {
   }
 }
 
-CualiG(base_int358$SEXO, base_int358$SEXO,2)
-tablas(base_int358$SEXO, base_int358$SEXO,1)
+
 
 #===============================================================================
 # analisis_cualitativo
@@ -608,8 +598,7 @@ analisis_cualitativo <- function(BD, var_respuesta, s=1) {
   return(Resultado)
 }
 
-analisis_cualitativo(base_int358[,2:6], base_int358$SEXO,2)
-names(analisis_cualitativo(base_int358, base_int358$SEXO,2))
+
 
 #===============================================================================
 # AnalisisCompleto2
