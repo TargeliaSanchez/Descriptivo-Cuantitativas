@@ -569,7 +569,7 @@ analisis_cualitativo <- function(BD, var_respuesta, s=1) {
   for (i in 1:n) {
     variable_actual <- BD[[i]]
     if (all(is.na(variable_actual))) next
-    if (is.numeric(as.numeric(variable_actual))& length(unique(na.omit(variable_actual)))>40) next
+    if (sum(is.na(as.numeric(unique(na.omit(variable_actual)))))>15) next
     
     resultado <- tryCatch({
       CualiG(variable_actual, var_respuesta, s)
