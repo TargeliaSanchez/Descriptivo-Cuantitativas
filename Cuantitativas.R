@@ -718,7 +718,12 @@ AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1) {
     
     Tab <- tryCatch({
       if (tipo_nm == "Cuantitativa") {
+        if(length(unique(na.omit(as.numerci(BD[, nm, drop = FALSE]))))<=6){
+          analisis_cualitativo(BD[, nm, drop = FALSE],  respuesta_vec, s)
+          }
+        else{
         Resumen(BD[, nm, drop = FALSE], respuesta_vec, s)
+          }
       } else {
         analisis_cualitativo(BD[, nm, drop = FALSE],  respuesta_vec, s)
       }
