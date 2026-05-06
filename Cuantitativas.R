@@ -51,10 +51,10 @@ tipoV <- function(BD) {
   
   nomFecha <- nombres[es_fecha_convertible]
   nomCuan  <- setdiff(nombres[es_num_convertible | tipo[nombres] == "numeric"], nomFecha)
-  nomCual  <- setdiff(nombres, c(nomCuan, nomFecha))
-  
+  nomCual  <- setdiff(nombres, c(nomCuan, nomFecha))  
   factores <- names(Exploratorio)[tipo == "factor"]
   listas   <- names(Exploratorio)[es_lista]
+  nomLogit <- setdiff(nombres, c(nomCuan, nomFecha, nomCual, listas, factores))
   
   # ---- SALIDA ----
   Resultado <- list(
@@ -64,6 +64,7 @@ tipoV <- function(BD) {
     Fechas   = nomFecha,
     Factores = factores,
     Listas   = listas
+    Logico   = nomLogit
   )
   
   return(Resultado)
