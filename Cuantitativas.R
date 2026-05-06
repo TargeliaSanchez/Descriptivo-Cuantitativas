@@ -63,7 +63,7 @@ tipoV <- function(BD) {
     Cualis   = nomCual,
     Fechas   = nomFecha,
     Factores = factores,
-    Listas   = listas
+    Listas   = listas,
     Logico   = nomLogit
   )
   
