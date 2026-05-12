@@ -445,11 +445,11 @@ prueba_asociacion <- function(Table) {  ## funcion para validar el tipo de prueb
         }, error = function(e) {
           NA  # Retorna NA en caso de error
         })
-        p <- paste0(round(prueba,2), "\u2020")
+        p <- paste0(round(prueba,2), "**")
       } else if (prod(dim(Table)) >= 4 & prod(dim(Table)) <= 6) {
         # Entre 4 y 6 celdas: prueba de Fisher exacta
         prueba <- fisher.test(Table)$p.value
-        p <- paste0(round(prueba,2), "\u2020")
+        p <- paste0(round(prueba,2), "**")
       } else {
         # Menos de 4 celdas: no es posible realizar la prueba
         prueba <- NA
