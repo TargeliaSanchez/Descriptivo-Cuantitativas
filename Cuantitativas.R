@@ -196,7 +196,7 @@ resumen_bivariado <- function(variable_ind, var_respuesta) {
                 n = n))
   }
   
-  # --- Estad?sticos por grupo (para mostrar en tabla) ---
+  # --- Estadisticos por grupo (para mostrar en tabla) ---
   estadisticas <- calcular_estadisticas(variable_ind, var_respuesta, p_valor_normalidad)
   
   # --- Seleccion de niveles v?lidos (n >= 2) para la prueba ---
@@ -654,11 +654,11 @@ AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
         # posibles nombres que salen de 'analisis_cualitativo'
         nms <- names(Tab)
         nms[nms == "nom_Variable"] <- "Variable"
-        #nms[nms == "rownames(Cual)"] <- "Estad?stico"
-        #nms[nms == "rownames(Tabla_bivariada)"] <- "Estad?stico"
+        #nms[nms == "rownames(Cual)"] <- "Estadistico"
+        #nms[nms == "rownames(Tabla_bivariada)"] <- "Estadistico"
         names(Tab) <- nms
         if (!"variable_ind" %in% names(Tab))     Tab$variable_ind <- nm
-        if (!"Estad?stico" %in% names(Tab))  Tab$Estad?stico <- NA
+        if (!"Estadistico" %in% names(Tab))  Tab$Estadistico <- NA
         Tab$Tipo <- "Cualitativa"
         piezas[[length(piezas) + 1]] <- Tab
       }
@@ -677,8 +677,8 @@ AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
   R <- do.call(rbind, piezas)
   rownames(R) <- NULL
   
-  # Orden final: variable_ind | Estad?stico | ... | Tipo
-  primero <- c("variable_ind", "Estad?stico")
+  # Orden final: variable_ind | Estadistico | ... | Tipo
+  primero <- c("variable_ind", "Estadistico")
   otros   <- setdiff(names(R), c(primero, "Tipo"))
   R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
   R[,-2]
@@ -738,13 +738,13 @@ AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1) {
     # armonizar nombres de salida
     nms <- names(Tab)
     #nms[nms == "nom_Variable"] <- "variable_ind"
-    #nms[nms == "V1"] <- "Estad?stico"
-    #nms[nms == "rownames(Cual)"] <- "Estad?stico"
-    #nms[nms == "rownames(Tabla_bivariada)"] <- "Estad?stico"
+    #nms[nms == "V1"] <- "Estadistico"
+    #nms[nms == "rownames(Cual)"] <- "Estadistico"
+    #nms[nms == "rownames(Tabla_bivariada)"] <- "Estadistico"
     #names(Tab) <- nms
     
     if (!"variable_ind" %in% names(Tab))    Tab$variable_ind <- nm
-    #if (!"Estad?stico" %in% names(Tab)) Tab$Estad?stico <- NA
+    #if (!"Estadistico" %in% names(Tab)) Tab$Estadistico <- NA
     
     Tab$Tipo <- tipo_nm
     piezas[[length(piezas) + 1]] <- Tab
@@ -762,7 +762,7 @@ AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1) {
   R <- do.call(rbind, piezas)
   rownames(R) <- NULL
   
-  # orden final: variable_ind | Estad?stico | ... | Tipo
+  # orden final: variable_ind | Estadistico | ... | Tipo
   primero <- c("Variable","variable_ind")
   otros   <- setdiff(names(R), c(primero, "Tipo"))
   R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
