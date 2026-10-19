@@ -609,7 +609,7 @@ analisis_cualitativo <- function(BD, var_respuesta, s=1) {
 # Realiza an?lisis cualitativo para las variables en una base de datos
 #===============================================================================
 
-AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1, nivel=12) {
+AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1, nivel=6) {
   BD <- as.data.frame(BD)
   tipos <- tipoV(BD)  # tus reglas
   
