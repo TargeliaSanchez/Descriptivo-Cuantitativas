@@ -609,13 +609,13 @@ analisis_cualitativo <- function(BD, var_respuesta, s=1) {
 # Realiza an?lisis cualitativo para las variables en una base de datos
 #===============================================================================
 
-AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
+AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1, nivel=12) {
   BD <- as.data.frame(BD)
-  tipos <- tipoV(BD)  # usa tus reglas para Cuantis y Cualis
+  tipos <- tipoV(BD)  # tus reglas
   
-  # Preparar var_respuesta (por nombre o vector); en bivariado, factor
+  # preparar var_respuesta (nombre o vector); en bivariado => factor
   if (s == 2) {
-    if (is.null(var_respuesta)) stop("Para s = 2 (bivariado) debes pasar 'var_respuesta'.")
+    if (is.null(var_respuesta)) stop("Para s = 1 (bivariado) debes pasar 'var_respuesta'.")
     if (is.character(var_respuesta) && length(var_respuesta) == 1 && var_respuesta %in% names(BD)) {
       respuesta_vec <- BD[[var_respuesta]]
     } else {
@@ -628,46 +628,47 @@ AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
   
   piezas <- list()
   
-  ## --- Cuantitativas ---
-  if (length(tipos$Cuantis) > 0) {
-    for (nm in tipos$Cuantis) {
-      Tab <- tryCatch(
-        Resumen(BD[, nm, drop = FALSE], respuesta_vec, s),
-        error = function(e) NULL
-      )
-      if (!is.null(Tab) && nrow(Tab) > 0) {
-        #Tab[1, 1] <- nm 
-        Tab$Tipo <- "Cuantitativa"
-        piezas[[length(piezas) + 1]] <- Tab
+  # >>> recorre en el ORDEN ORIGINAL <<<
+  for (nm in names(BD)) {
+    tipo_nm <- if (nm %in% tipos$Cuantis) "Cuantitativa" else if (nm %in% tipos$Cualis) "Cualitativa" else NA
+    if (is.na(tipo_nm)) next
+    
+    Tab <- tryCatch({
+      if (tipo_nm == "Cuantitativa") {
+        vals <- BD[[nm]]
+        n_levels <- length(unique(na.omit(vals)))
+        
+        if(n_levels<=nivel){
+          analisis_cualitativo(BD[, nm, drop = FALSE],  respuesta_vec, s)
+        }
+        else{
+          Resumen(BD[, nm, drop = FALSE], respuesta_vec, s)
+        }
+      } else {
+        analisis_cualitativo(BD[, nm, drop = FALSE],  respuesta_vec, s)
       }
-    }
-  }
-  
-  ## --- Cualitativas ---
-  if (length(tipos$Cualis) > 0) {
-    for (nm in tipos$Cualis) {
-      Tab <- tryCatch(
-        suppressWarnings(analisis_cualitativo(BD[, nm, drop = FALSE], respuesta_vec, s)),
-        error = function(e) NULL
-      )
-      if (!is.null(Tab) && nrow(Tab) > 0) {
-        # posibles nombres que salen de 'analisis_cualitativo'
-        nms <- names(Tab)
-        nms[nms == "nom_Variable"] <- "Variable"
-        #nms[nms == "rownames(Cual)"] <- "Estadistico"
-        #nms[nms == "rownames(Tabla_bivariada)"] <- "Estadistico"
-        names(Tab) <- nms
-        if (!"variable_ind" %in% names(Tab))     Tab$variable_ind <- nm
-        if (!"Estadistico" %in% names(Tab))  Tab$Estadistico <- NA
-        Tab$Tipo <- "Cualitativa"
-        piezas[[length(piezas) + 1]] <- Tab
-      }
-    }
+    }, error = function(e) NULL)
+    
+    if (is.null(Tab) || nrow(Tab) == 0) next
+    
+    # armonizar nombres de salida
+    nms <- names(Tab)
+    #nms[nms == "nom_Variable"] <- "variable_ind"
+    #nms[nms == "V1"] <- "Estadistico"
+    #nms[nms == "rownames(Cual)"] <- "Estadistico"
+    #nms[nms == "rownames(Tabla_bivariada)"] <- "Estadistico"
+    #names(Tab) <- nms
+    
+    if (!"variable_ind" %in% names(Tab))    Tab$variable_ind <- nm
+    #if (!"Estadistico" %in% names(Tab)) Tab$Estadistico <- NA
+    
+    Tab$Tipo <- tipo_nm
+    piezas[[length(piezas) + 1]] <- Tab
   }
   
   if (length(piezas) == 0) return(data.frame())
   
-  # Unir con columnas diferentes (union de nombres + relleno con NA)
+  # unir con columnas dispares
   all_cols <- Reduce(union, lapply(piezas, names))
   piezas <- lapply(piezas, function(df) {
     faltan <- setdiff(all_cols, names(df))
@@ -677,12 +678,20 @@ AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
   R <- do.call(rbind, piezas)
   rownames(R) <- NULL
   
-  # Orden final: variable_ind | Estadistico | ... | Tipo
-  primero <- c("variable_ind", "Estadistico")
+  # orden final: variable_ind | Estadistico | ... | Tipo
+  primero <- c("Variable","variable_ind")
   otros   <- setdiff(names(R), c(primero, "Tipo"))
   R <- R[, c(primero, otros, "Tipo"), drop = FALSE]
-  R[,-2]
+  
+  # (seguro extra) reordenar filas por el orden de la BD si hiciera falta
+  if ("variable_ind" %in% names(R)) {
+    R <- R[order(match(R$variable_ind, names(BD))), , drop = FALSE]
+  }
+  
+  R
 }
+
+
 
 #===============================================================================
 # AnalisisCompleto
@@ -693,7 +702,7 @@ AnalisisCompleto2 <- function(BD, var_respuesta = NULL, s = 1) {
 # Realiza an?lisis cualitativo para las variables en una base de datos
 #===============================================================================
 
-AnalisisCompleto <- function(BD, var_respuesta = NULL, s = 1) {
+AnalisisCompleto3 <- function(BD, var_respuesta = NULL, s = 1) {
   BD <- as.data.frame(BD)
   tipos <- tipoV(BD)  # tus reglas
   
