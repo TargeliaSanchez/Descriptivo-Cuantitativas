@@ -405,8 +405,16 @@ Resumen <- function(BD, var_respuesta, s=1) {
       
     }
   }
-  return(cbind(fram#, nom_Variable
-               ))
+  if (s == 3) {
+    for (i in 1:n) {
+      Res <- Resumen_res_cuanti(BD[, i], var_respuesta)
+      Res[1,1]<- names(BD)[i]
+      fram <- rbind(fram, Res)
+      # nom_Variable <- c(nom_Variable, rep(names(BD)[i], 2))
+      
+    }
+  }
+  return(cbind(fram)) #, nom_Variable
 }
 
 
