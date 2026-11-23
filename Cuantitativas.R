@@ -254,6 +254,100 @@ resumen_bivariado <- function(variable_ind, var_respuesta) {
   return(resultado_final)
 }
 
+#===============================================================================
+# Resumen_res_cuanti
+# Esta función es similar a res_cuanti, pero con la particularidad que se utiliza cuando 
+# la respuesta es cuantitativa por lo cual hará las descriptivas de las variables independientes cualitatvas
+# Respecto a una variable cuantitativa. --- pendiente hacerlo para cuando amabas sean cuantitativas y arrojar el algoritmo final así.
+# Entradas:
+# variable_ind, var_respuesta
+#===============================================================================
+
+
+Resumen_res_cuanti <- function(variable_ind, var_respuesta){
+  var_respuesta<- as.numeric(var_respuesta)
+  variable_ind <- droplevels(as.factor(variable_ind))  # asegurar factor y limpiar niveles vac?os
+  p_valor_normalidad    <- round(test_normalidad(var_respuesta), 2)   # Evaluar normalidad
+  
+  
+  # Funcion auxiliar para calcular las estad?sticas descriptivas por grupo
+  # Entradas: var (independiente), grupo(var_respuesta cualitativa), p (normalidad)
+  calcular_estadisticas <- function(var, grupo, p_norm) {
+    if (p_norm <= 0.05) {
+      Med <- tapply(var, grupo, median,   na.rm = TRUE)
+      Q1_Sd <- tapply(var, grupo, quantile, 0.25, na.rm = TRUE)
+      tipo_res <- "Mediana [RIC]"
+    } else {
+      Med <- tapply(var, grupo, mean,     na.rm = TRUE)
+      Q1_Sd <- tapply(var, grupo, sd, na.rm = TRUE)
+      tipo_res <- rep("Media [sd]")
+    }
+    #Q1_Sd <- tapply(var, grupo, quantile, 0.25, na.rm = TRUE)
+    Q3    <- tapply(var, grupo, quantile, 0.75, na.rm = TRUE)
+    n     <- tapply(1 - is.na(var), grupo, sum)
+    return(list(Med = round(Med, 2),
+                Q1_Sd = round(Q1_Sd, 2),
+                Q3 = round(Q3, 2),
+                n = n))
+  }
+  
+  # --- Estadisticos por grupo (para mostrar en tabla) ---
+  estadisticas <- calcular_estadisticas(var_respuesta, variable_ind, p_valor_normalidad)
+  
+  # --- Seleccion de niveles v?lidos (n >= 2) para la prueba ---
+  n_por_grupo <- estadisticas$n
+  validar_niveles  <- names(n_por_grupo[n_por_grupo >= 2])# para determinar la prueba
+  
+  if (length(validar_niveles) >= 2) {
+    idx   <- !is.na(var_respuesta) & !is.na(variable_ind) & (variable_ind %in% validar_niveles)
+    var_cat <- var_respuesta[idx]
+    grupo_cat <- droplevels(as.factor(variable_ind[idx]))
+    
+    # Elegir prueba acorde a normalidad usando el subconjunto
+    if (p_valor_normalidad <= 0.05) {
+      `Valor P` <- if (nlevels(grupo_cat) == 2) {
+        suppressWarnings(wilcox.test(var_cat ~ grupo_cat, exact = FALSE)$p.value)
+      } else {
+        kruskal.test(var_cat ~ grupo_cat)$p.value
+      }
+    } else {
+      `Valor P` <- if (nlevels(grupo_cat) == 2) {
+        t.test(var_cat ~ grupo_cat)$p.value
+      } else {
+        anova(aov(var_cat ~ grupo_cat))$`Pr(>F)`[1]
+      }
+    }
+  } else {
+    `Valor P` <- NA_real_
+  }
+  
+  
+  # --- Total univariado de la variable (como ya hac?as) ---
+  Total <- resumen_univariado(variable_ind)
+  
+  # --- Armar tabla bivariada como en tu versi?n ---
+  if (p_valor_normalidad <= 0.05) {
+    bivariado <- cbind(
+      N   = estadisticas$n,
+      Res = paste0(estadisticas$Med, " [", estadisticas$Q1_Sd, " - ", estadisticas$Q3, "]")
+    )
+  } else {
+    bivariado <- cbind(
+      N   = estadisticas$n,
+      Res = paste0(estadisticas$Med, " [", estadisticas$Q1_Sd, "]")
+    )
+  }
+  
+
+  categorias <- names(estadisticas$n)
+  resultado_final <- rbind(seq(1:4),cbind(
+    categoría = rownames(bivariado),
+    bivariado,
+    `Valor P` = rbind(round(`Valor P`, 2), "")
+  ))
+  colnames(resultado_final) <- c("categoría","N","Resumen" ,"Valor P")
+  return(resultado_final)
+}
 
 #===============================================================================
 # Resumen
@@ -261,7 +355,8 @@ resumen_bivariado <- function(variable_ind, var_respuesta) {
 # Entradas:
 # BD, var_respuesta, 
 # s = 1 (por defecto): Univariado (Descriptivo b?sico)
-# s = 2: Bivariado (Relacion entre variables)
+# s = 2: Bivariado cuando la variable de respuesta es cualitativa (Relacion entre variables)
+# s = 3: Bivariado cuando la variable de respuesta es cuantitativa (Solo asociación entre cuali y cuantis)
 #===============================================================================
 
 Resumen <- function(BD, var_respuesta, s=1) {
